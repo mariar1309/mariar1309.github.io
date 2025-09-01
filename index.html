@@ -1,16 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+            color: #333;
+        }
+        header {
+            background: #2196f3;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            background: #1976d2;
+            padding: 0.75rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.03);
+        }
+        .card h2 {
+            margin-top: 0;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #f5f5f5;
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My CS180 Portfolio!</h1>
-    <a href="./proj0/">Project 0</a>
+    <header>
+        <h1>Welcome to My CS180 Portfolio!</h1>
+        <p>View my projects for this class. </p>
+    </header>
+
+    <nav>
+        <a href="./">Home</a>
+        <a href="#projects">Projects</a>
+        <a href="#about">About Me</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <main id="projects">
+        <div class="card">
+            <h2>Project 0</h2>
+            <p>Getting familiar with your camera</p>
+            <a href="./proj0/">View Project</a>
+        </div>
+    </main>
+
+    <section id="about" style="padding: 2rem; background: #fff3e0;">
+        <h2>About Me</h2>
+        <p>Hi! More info to come</p>
+    </section>
+
+    <section id="contact" style="padding: 2rem; background: #e8f5e9;">
+        <h2>Contact</h2>
+        <p>You can reach me at <a href="mariarufova@berkeley.edu">mariarufova@berkeley.edu</a>.</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 My Portfolio. </p>
+    </footer>
 </body>
 </html>
