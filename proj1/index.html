@@ -5,42 +5,232 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS180 Project 1</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&family=Source+Code+Pro:wght@300;400&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <header class="hero-banner">
-            <div class="hero-content">
-                <h1>Images of the Russian Empire: Colorizing the Prokudin-Gorskii Photo Collection</h1>
-                <h2>Maria Rufova - CS180 - Fall 2025</h2>
-            </div>
+        <!-- Header -->
+        <header class="header">
+            <h1>Images of the Russian Empire</h1>
+            <h2>Colorizing the Prokudin-Gorskii photo collection</h2>
+            <h2>CS 180 Fall 25 - Maria Rufova</h2>
         </header>
 
-        <section class="problem-description">
-            <h2>Project Overview</h2>
-            <div class="content-area">
-                <p>
-                    i will definitely not forget to write the project intro over here
-                </p>
-                
-                <div class="gallery">
-                    <figure>
-                        <img src="./proj1_data/emir.tif" alt="Original glass plate">
-                        <figcaption>Figure 1: Original Emir three-channel glass plate image</figcaption>
-                    </figure>
-                </div>
-
-                <div class="slider-container">
-                    <h3>example</h3>
-                    
-                    <div class="image-comparison">
-                        <img src="images/bw_version.jpg" alt="Black and white" class="bottom-image">
-                        <img src="images/color_version.jpg" alt="Color" class="top-image">
-                        <input type="range" min="0" max="100" value="50" class="slider" id="bw-color-slider">
-                        <div class="slider-button"></div>
-                    </div>
-                </div>
+        <!-- Introduction Section -->
+        <section class="introduction">
+            <h2>Introduction</h2>
+            <p>
+                In 1907, Russian chemist
+                <a href="https://en.wikipedia.org/wiki/Sergey_Prokudin-Gorsky">Sergey Prokudin-Gorsky</a> traveled the
+                Russian Empire taking the world's first color images. He used a black and white camera and took sets of 3
+                images, each through a blue, green, and red colored filter. The results are the
+                <a href="https://www.loc.gov/collections/prokudin-gorskii/">Prokudin-Gorskii Collection</a>.
+            </p>
+            <p>
+                The goal of this project is to take digitized versions of his collection from the Library of Congress and
+                reconstruct the color images by automatically aligning each image in the collection. The output
+                will be 3-channel color images showing the original subject in color.
+            </p>
+            
+            <div class="gallery">
+                <figure>
+                    <img src="proj1_data/monastery.jpg" alt="Monastery glass plate" />
+                    <figcaption>
+                        Monastery glass plate
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="proj1_data/cathedral.jpg" alt="Cathedral glass plate" />
+                    <figcaption>
+                        Cathedral glass plate
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="proj1_data/tobolsk.jpg" alt="Emir glass plate" />
+                    <figcaption>
+                        Tobolsk glass plate
+                    </figcaption>
+                </figure>
             </div>
+            
+            <p class="image-caption">
+                Examples of original glass plate images showing the three color channels stacked vertically.
+            </p>
+        </section>
+
+        <section class="approach">
+            <h2>Approach</h2>
+            <p>
+                To align the images, the image is first cut into thirds to separate the blue, green, and red channels.
+                The green and red channels are then aligned to the blue channel
+            </p>
+
+            <h3>Naive Implementation: L2 Norm</h3>
+            <p>
+               Euclidian Distance
+            </p>
+            <div class="gallery">
+                <figure>
+                    <img src="l2_images/l2_monastery.jpg" alt="L2_monastery">
+                    <figcaption>L2 Alignment - Monastery</figcaption>
+                </figure>
+                <figure>
+                    <img src="l2_images/l2_emir.jpg" alt="L2_emir">
+                    <figcaption>L2 Alignment - Emir</figcaption>
+                </figure>
+                <figure>
+                    <img src="l2_images/l2_siren.jpg" alt="L2_siren">
+                    <figcaption>L2 Alignment - Siren</figcaption>
+                </figure>
+            </div>
+
+            <h3>Another Naive Implementation: Normalized Cross-Correlation (NCC)</h3>
+            <p>
+                Normalized Cross Correlation
+            </p>
+            <div class="gallery">
+                <figure>
+                    <img src="ncc_images/ncc_monastery.jpg" alt="NCC_Monastery">
+                    <figcaption>NCC Alignment - Monastery</figcaption>
+                </figure>
+                <figure>
+                    <img src="ncc_images/ncc_emir.jpg" alt="NCC_Emir">
+                    <figcaption>NCC Alignment - Emir</figcaption>
+                </figure>
+                <figure>
+                    <img src="ncc_images/ncc_siren.jpg" alt="NCC_Siren">
+                    <figcaption>NCC Alignment - Siren</figcaption>
+                </figure>
+            </div>
+
+            <h3>Multi-Scale Pyramid Approach</h3>
+            <p>
+                pyramids are great
+            </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images/pyramid_diagram.jpg" alt="Pyramid Diagram">
+                    <figcaption>Figure 4: Multi-scale pyramid structure</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results">
+            <h2>Results</h2>
+            <p>
+                something
+            </p>
+            
+            <div class="gallery">
+                <figure>
+                    <img src="final_images/pyramid_cathedral.jpg" alt="Cathedral">
+                    <figcaption>
+                        <b>Cathedral</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_church.jpg" alt="Church">
+                    <figcaption>
+                        <b>Church</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_emir.jpg" alt="Emir">
+                    <figcaption>
+                        <b>Emir</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_harvesters.jpg" alt="Harvesters">
+                    <figcaption>
+                        <b>Harvesters</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_icon.jpg" alt="Icon">
+                    <figcaption>
+                        <b>Icon</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_italil.jpg" alt="Italil">
+                    <figcaption>
+                        <b>Italil</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_lastochikino.jpg" alt="Lastochikino">
+                    <figcaption>
+                        <b>Lastochikino</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_lugano.jpg" alt="Lugano">
+                    <figcaption>
+                        <b>Lugano</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_melons.jpg" alt="Melons">
+                    <figcaption>
+                        <b>Melons</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_monastery.jpg" alt="Monastery">
+                    <figcaption>
+                        <b>Monastery</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_self_portrait.jpg" alt="Self Portrait">
+                    <figcaption>
+                        <b>Self Portrait</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_siren.jpg" alt="Siren">
+                    <figcaption>
+                        <b>Siren</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_three_generations.jpg" alt="Three Generations">
+                    <figcaption>
+                        <b>Three Generations</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="final_images/pyramid_tobolsk.jpg" alt="Tobolsk">
+                    <figcaption>
+                        <b>Tobolsk</b><br>
+                        Green: [2, 5], Red: [3, 12]
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="conclusion">
+            <h2>Sources</h2>
+            <p>
+                pyramid is stacking up to be the best (who could have thought)
+            </p>
+            <p>
+                something here
+            </p>
         </section>
     </div>
 </body>
