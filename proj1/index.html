@@ -18,26 +18,20 @@
         <!-- Introduction Section -->
         <section class="introduction">
             <h2>Introduction</h2>
-            <p>
-                In 1907, Russian chemist
-                <a href="https://en.wikipedia.org/wiki/Sergey_Prokudin-Gorsky">Sergey Prokudin-Gorsky</a> traveled the
-                Russian Empire taking the world's first color images. He used a black and white camera and took sets of 3
-                images, each through a blue, green, and red colored filter. The results are the
-                <a href="https://www.loc.gov/collections/prokudin-gorskii/">Prokudin-Gorskii Collection</a>.
+            <p> 
+            In 1907, Russian chemist and photographer <a href="https://en.wikipedia.org/wiki/Sergey_Prokudin-Gorsky">Sergey Mikhailovich Prokudin-Gorsky
+            </a> (1863-1944) [Сергей Михайлович Прокудин-Горский] captured his travels across the Russian Empire using glass plate, 3-channel photography in one of the first pioneer efforts of color photography.
+            He documented Russian landscapes, cities, and people using triple frame black-and-white negatives, each being made up of 3 exposures made through blue, green, and red filters. 
+            The photo collection was later sold to the Library of Congress, which reconstructed and digitalized the photographs in the <a href="https://www.loc.gov/collections/prokudin-gorskii/">Prokudin-Gorskii Collection</a>.
             </p>
-            <p>
-                The goal of this project is to take digitized versions of his collection from the Library of Congress and
-                reconstruct the color images by automatically aligning each image in the collection. The output
-                will be 3-channel color images showing the original subject in color.
+            <p> 
+            The goal of this project is to use modern image-processing techniques to digitally reconstruct the original glass plates by automatically aligning and stacking the blue, green, and red channels. 
+            I implemented both naive alignment techniques using L2 norm and normalized cross-correlation (NCC) to measure channel similarity and find optimal displacements. 
+            For larger images with significant displacements, I developed a multi-scale image pyramid approach that efficiently aligns channels from coarse to fine resolution, 
+            reducing computation time while maintaining alignment accuracy. 
             </p>
             
             <div class="gallery">
-                <figure>
-                    <img src="proj1_data/monastery.jpg" alt="Monastery glass plate" />
-                    <figcaption>
-                        Monastery glass plate
-                    </figcaption>
-                </figure>
                 <figure>
                     <img src="proj1_data/cathedral.jpg" alt="Cathedral glass plate" />
                     <figcaption>
@@ -45,7 +39,13 @@
                     </figcaption>
                 </figure>
                 <figure>
-                    <img src="proj1_data/tobolsk.jpg" alt="Emir glass plate" />
+                    <img src="proj1_data/monastery.jpg" alt="Monastery glass plate" />
+                    <figcaption>
+                        Monastery glass plate
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img src="proj1_data/tobolsk.jpg" alt="Tobolskglass plate" />
                     <figcaption>
                         Tobolsk glass plate
                     </figcaption>
@@ -53,72 +53,130 @@
             </div>
             
             <p class="image-caption">
-                Examples of original glass plate images showing the three color channels stacked vertically.
+                Examples of original glass plate images showing the three BGR color channels stacked vertically.
             </p>
         </section>
 
         <section class="approach">
-            <h2>Approach</h2>
+            <h2>Naive Approach</h2>
             <p>
-                To align the images, the image is first cut into thirds to separate the blue, green, and red channels.
-                The green and red channels are then aligned to the blue channel
+                Each of Prokudin-Gorskii's glass plates contains three exposures captured through BGR filters that need to be stacked vertically and aligned on top of 
+                one another to reconstruct the original image. In a naive approach, my algorithm dissects the long glass plate into 3 separate shots.
+                Since these exposures were taken sequentially with slight shakes and differences between the shots, the channels are slightly misaligned, and we need to ustively search over 
+                a window of possible displacements to find the perfect fit. The blue channel serves as the reference, with red and green channels aligned to it. Borders arehae cropped
+                from the channels during alignment to improve accuracy by focusing on the core of the image. The project description suggested using either <b>L2 Norm (Euclidian Distance)</b> or
+                <b>Normalized Cross-Correlation (NCC)</b> for alignment scoring, so I implemented both to compare their performance. 
             </p>
 
-            <h3>Naive Implementation: L2 Norm</h3>
+            <h3>Naive Implementation: L2 Norm (Euclidian Distance)</h3>
             <p>
-               Euclidian Distance
+               The L2 norm, also known as the Euclidian Distance, served as my initial alignment metric. This metric works by calculating the root sum of squared pixel value difference between 2 images. 
+               Mathematically, it looks like <b>sqrt(sum((reference_channel - aligned_channel)^2))</b> where the sum is taken over all pixel values.
             </p>
+
+            <p>
+               The implementation performs an exhaustive search over a [15 x 15] pixel window, testing several possible displacement calculations for each channel. 
+               For each candidate displacement, I used np.roll to shift the green or the red channel and compared it agains the blue fixed channel reference. To improve alignment accuracy and avoid
+               any noise from the photographs' edges, I applied a border crop to all channels before computing the L2 distance. 
+            </p>
+
+            <p>     
+                The key characteristic of L2 alignment is that a perfect score of 0 indicates identical images, while higher values indicate greater dissimilarity.
+                Therefore, the implementaiton selects the displacement vector that minimizes the L2 distance. 
+                But while this method worked well for smaller sample JPEG files where the search window was sufficient, it became <b>veeeeeerryyyy</b> slow when applied to higher resolution
+                TIF plates. The exhaustive search approach simply couldn't handle the larger displacements and image sizes found in the original scans efficiently.
+    
+                I thought that the L2 approached worked pretty well on JPEG files, which came out looking bright and clean! However, for fun and for personal understanding, I also wanted to implement the NCC scorin
+                approach to see if it would produce a better result.
+            </p>
+
             <div class="gallery">
+                <figure>
+                    <img src="l2_images/l2_cathedral.jpg" alt="L2_cathedral">
+                    <figcaption>L2 Alignment - Cathedral</figcaption>
+                    <figcaption>G: (5, 2)  R: (12,3)</figcaption>
+                </figure>
                 <figure>
                     <img src="l2_images/l2_monastery.jpg" alt="L2_monastery">
                     <figcaption>L2 Alignment - Monastery</figcaption>
+                    <figcaption>G: (-3, 2)  R: (3,3)</figcaption>
                 </figure>
                 <figure>
-                    <img src="l2_images/l2_emir.jpg" alt="L2_emir">
-                    <figcaption>L2 Alignment - Emir</figcaption>
-                </figure>
-                <figure>
-                    <img src="l2_images/l2_siren.jpg" alt="L2_siren">
-                    <figcaption>L2 Alignment - Siren</figcaption>
+                    <img src="l2_images/l2_tobolsk.jpg" alt="L2_tobolsk">
+                    <figcaption>L2 Alignment - Tobolsk</figcaption>
+                    <figcaption>G: (3, 2)  R: (6,3)</figcaption>
                 </figure>
             </div>
 
             <h3>Another Naive Implementation: Normalized Cross-Correlation (NCC)</h3>
             <p>
-                Normalized Cross Correlation
+                (Spoiler: I didn't notice much of a difference from the L2 scoring method.)
+            </p>
+
+            <p>
+                The second scoring method I implemented was Normalized Cross-Correlation (NCC), which measures alignment by comparing the similarity of two normalized image patches. The idea is to treat each channel as a vector, subtract its mean, divide by its norm, and then compute the dot product: <b>(image1./||image1|| and image2./||image2||)</b>
+                The nornalization ensures that the comparison is more robust and less subject to changes in brightness, like may be the issue with L2.
+            </p>
+            <p>
+                Just like with my L2 method, I used the blue channel as the reference and searched over a displacement window of 
+                [−15,15] pixels, shifting the red and green channels using np.roll. To avoid edge artifacts that could distort the correlation, I applied a border crop before scoring.
+            </p>
+            <p>
+                Unlike L2, the NCC scoring ranges from -1 to 1, where scores closer to +1 indicate betterr alignment. The implementation selects the displacement that maximizes the NCC score.
+                While the NCC could have theoretically handled brightness variations better by normalizing each patch, I found that in practice it produced nearly identical results as L2 for most images. 
+            </p>
+            <p>
+                The NCC method shared the same limitation as L2 when applied to high-resolution TIF files. 
+                The exhaustive search remained prohibitively slow for the larger glass plate images, confirming that both naive approaches were only practical for the smaller JPEG test images rather than the full-resolution archival scans.
             </p>
             <div class="gallery">
                 <figure>
-                    <img src="ncc_images/ncc_monastery.jpg" alt="NCC_Monastery">
+                    <img src="ncc_images/ncc_cathedral.jpg" alt="NCC_cathedral">
+                    <figcaption>NCC Alignment - Cathedral</figcaption>
+                    <figcaption>G: (5, 2)  R: (10,3)</figcaption>
+                </figure>
+                <figure>
+                    <img src="ncc_images/ncc_monastery.jpg" alt="NCC_monastery">
                     <figcaption>NCC Alignment - Monastery</figcaption>
+                    <figcaption>G: (-3, 2)  R: (3, 2)</figcaption>
                 </figure>
                 <figure>
-                    <img src="ncc_images/ncc_emir.jpg" alt="NCC_Emir">
-                    <figcaption>NCC Alignment - Emir</figcaption>
-                </figure>
-                <figure>
-                    <img src="ncc_images/ncc_siren.jpg" alt="NCC_Siren">
-                    <figcaption>NCC Alignment - Siren</figcaption>
+                    <img src="ncc_images/ncc_tobolsk.jpg" alt="NCC_tobolsk">
+                    <figcaption>NCC Alignment - Tobolsk</figcaption>
+                    <figcaption>G: (3, 3)  R: (6, 3)</figcaption>
                 </figure>
             </div>
 
             <h3>Multi-Scale Pyramid Approach</h3>
             <p>
-                pyramids are great
+                No surprises here, the pyramid *stacked up* to be the best!
+            </p>
+            <p>
+                While NCC and L2 scoring worked well on the small JPEGs, they both became <b>excruciatingly</b> slow on the full-resolution glass plates. 
+                Searching over a small [-15, 15] pixels in both x and y directions is manageable for small JPEGs, but too computationally expensive for TIFs.
+                To speed this all up, I used multi-scale image pyramid approach, which aligns images across progressively finer resolutions.
+            </p>
+            <p>
+                The idea is to repeatedly downsample each channel by a factor of 2 until the image is sufficiently small, perform alignment at the coarsest level, and then recursively refine at higher resolutions. 
+                At each level, the displacement is scaled up by a factor of 2 and used as the initial guess, while the search window is narrowed to only a few pixels. 
+            </p>
+            <p>
+                I chose 5 levels for the pyramid. 
+                I originally tried 3 levels, but the coarsest image was still too large, which meant the initial alignment drifted significantly, leading to visible color splotches and misalignment on final results.
+                With 5 levels, the coarsest image is only about 1/2^5 = 1/32 of the original resolution, small enough to quickly establish a reliable global alignment.
             </p>
             <div class="gallery">
                 <figure>
-                    <img src="images/pyramid_diagram.jpg" alt="Pyramid Diagram">
-                    <figcaption>Figure 4: Multi-scale pyramid structure</figcaption>
+                    <img src="proj1_data/pyramid.jpg" alt="Pyramid Diagram">
+                    <figcaption>Multi-scale pyramid structure. Source: Wikipedia (https://en.wikipedia.org/wiki/Pyramid_(image_processing))</figcaption>
                 </figure>
             </div>
         </section>
 
-        <!-- Results Section -->
         <section class="results">
-            <h2>Results</h2>
+            <h2>Final Results from Image Pyramid</h2>
             <p>
-                something
+                wow so pretty! thanks Mr. Prokudin-Gorskii !
             </p>
             
             <div class="gallery">
@@ -126,98 +184,98 @@
                     <img src="final_images/pyramid_cathedral.jpg" alt="Cathedral">
                     <figcaption>
                         <b>Cathedral</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (5, 2), R: (12, 3)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_church.jpg" alt="Church">
                     <figcaption>
                         <b>Church</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (-25, 4), R: (58, -4)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_emir.jpg" alt="Emir">
                     <figcaption>
                         <b>Emir</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (49, 24), R: (104, 56)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_harvesters.jpg" alt="Harvesters">
                     <figcaption>
                         <b>Harvesters</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (60, 17), R: (124, 14)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_icon.jpg" alt="Icon">
                     <figcaption>
                         <b>Icon</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (41, 17), R: (89, 23)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_italil.jpg" alt="Italil">
                     <figcaption>
                         <b>Italil</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (38, 21), R: (76, 35)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_lastochikino.jpg" alt="Lastochikino">
                     <figcaption>
                         <b>Lastochikino</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (-3, -2), R: (75, -9)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_lugano.jpg" alt="Lugano">
                     <figcaption>
                         <b>Lugano</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (41, -16), R: (93, -29)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_melons.jpg" alt="Melons">
                     <figcaption>
                         <b>Melons</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        Green: (79, 9), Red: (176, 14)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_monastery.jpg" alt="Monastery">
                     <figcaption>
                         <b>Monastery</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (-3, 2), R: (3, 2)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_self_portrait.jpg" alt="Self Portrait">
                     <figcaption>
                         <b>Self Portrait</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                         G: (79, 29), R: (176, 36)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_siren.jpg" alt="Siren">
                     <figcaption>
                         <b>Siren</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (49, -6), R: (96, -25)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_three_generations.jpg" alt="Three Generations">
                     <figcaption>
                         <b>Three Generations</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (53, 14), R: (112, 11)
                     </figcaption>
                 </figure>
                 <figure>
                     <img src="final_images/pyramid_tobolsk.jpg" alt="Tobolsk">
                     <figcaption>
                         <b>Tobolsk</b><br>
-                        Green: [2, 5], Red: [3, 12]
+                        G: (3, 3), R: (6, 3)
                     </figcaption>
                 </figure>
             </div>
