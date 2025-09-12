@@ -9,7 +9,7 @@ import skimage.io as skio
 import skimage.transform as transform
 
 # name of the input file
-imname = 'tobolsk.jpg'
+imname = 'laika.tif'
 # read in the image
 im = skio.imread(imname)
 # convert to double (might want to do this later on to save memory)    
@@ -48,6 +48,7 @@ def l2_alignment(reference_channel, channel_to_align, window = 15, init_displace
         for y in range(init_displacement[1] - window, init_displacement[1] + window + 1):
 
             #tried usng np.roll to test different alignemnts of R and G over B
+            #channel_to_align = aligned_channel[crop: - crop, crop: - crop]
             aligned_channel = np.roll(channel_to_align, (x, y), axis=(0, 1))
             aligned_channel_crop = aligned_channel[crop: - crop, crop: - crop]
 
@@ -75,13 +76,14 @@ def l2_alignment(reference_channel, channel_to_align, window = 15, init_displace
 # "Normalized Cross-Correlation (NCC), which is simply a dot product between two normalized vectors: (image1./||image1|| and image2./||image2||)."
 
 def ncc_alignment(reference_channel, channel_to_align, window=15, init_displacement=(0,0)):
+    #same as l2, making window static here is not effective, movedd it to args
     #window = 15
     best_score = - float('inf')
     best_displacement = init_displacement
 
     #need to normalize the reference channel, as well as both aligning channels
 
-    #normalise the ref channel first:
+    #normalise the ref channel first: (+crop beforehand)
     crop = max(50, reference_channel.shape[0] // 10)
     reference_crop = reference_channel[crop: - crop, crop: - crop]
     #ncc for reference
@@ -131,36 +133,39 @@ def pyramid(reference_channel, alignment_channel, alignment_function, window = 1
     #yaaaayyy recursion 
     if levels == 0:
         print(f"{window} size at level 0 reached, end rec")
+        #need thiis final alignment and disp
         aligned_channel, displacement = alignment_function(reference_channel, alignment_channel, window)
         return aligned_channel, displacement
     
     else:
-        #make a lowpass pyramid of lower res layesrs , scaling by factor of 2 (wiki)
+        #make a lowpass pyramid of lower res layesrs , scaling by factor of 2 
 
-        min_frame = 20
-        if reference_channel.shape[0] < min_frame or reference_channel.shape[1] < min_frame:
+        #funky results - i think i was making my window too small, adding a safety check
+        min_window = 20
+        if reference_channel.shape[0] < min_window or reference_channel.shape[1] < min_window:
             aligned_channel, displacement = alignment_function(reference_channel, alignment_channel, window)
             return aligned_channel, displacement
 
+        #downsampling by a factor of 2
         scale = 0.5
         downscale_reference = transform.rescale(reference_channel, scale, anti_aliasing=True, channel_axis=None)
         downscale_alignment = transform.rescale(alignment_channel, scale, anti_aliasing=True, channel_axis=None)
 
-        new_window = max(1, window // 2)
+        #moving on to grainier levels (yay recursion)
+        new_window = max(1, window // 2) #more window controls 
         align_level_down, disp_level_down = pyramid(downscale_reference, downscale_alignment, alignment_function, new_window, levels-1)
 
+        #remember the displacement from before and scale it for the nextt leevl
         scale_disp = (disp_level_down[0] * 2, disp_level_down[1] * 2)
 
+        #apply the displacement adnasj a bit with a smaller window
         test_align = np.roll(alignment_channel, scale_disp, axis=(0,1))
-
         smaller_window = 5
         best_alignment, best_displacement = alignment_function(reference_channel, test_align, smaller_window, init_displacement = (0,0))
 
         total_displacement = (scale_disp[0] + best_displacement[0], scale_disp[1] + best_displacement[1])
 
         return best_alignment, total_displacement
-
-        
 
 
 # functions that might be useful for aligning the images include:

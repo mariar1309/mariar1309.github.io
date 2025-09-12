@@ -294,23 +294,56 @@
 
         </section>
         <section class="conclusion">
-            <h2>BONUS: Funny bloopers from when I was finetuning the Image Pyramid</h2>
-            <p>
-                <!--bloopers dscription?-->
-            </p>
+            <h2>Examples of My Own Choosing from the Prokudin-Gorskii Collection</h2>
             <div class="gallery">
                 <figure>
-                    <img src="bloopers/pyr_ncc_three_generations.jpg" alt="harvesters">
+                    <img src="extra/pyr_most.jpg" alt="bridge">
+                    <figcaption>
+                        <b>Bridge</b><br>
+                        G: (67, -11), R: (118, -28)
+                    </figcaption>
                 </figure>
                 <figure>
-                    <img src="bloopers/pyr_ncc_harvesters.jpg" alt="harvesters">
+                    <img src="extra/pyr_kapri.jpg" alt="boy">
+                    <figcaption>
+                        <b>Boy in Kapri</b><br>
+                        G: (45, -13), R: (103, -11)
+                    </figcaption>
                 </figure>
                 <figure>
-                    <img src="bloopers/pyramid_melons-1.jpg" alt="harvesters">
+                    <img src="extra/pyr_laika.jpg" alt="laika">
+                    <figcaption>
+                        <b>Laika</b><br>
+                        G: (13, -1), R: (81, -2)
+                    </figcaption>
                 </figure>
             </div>
             
         </section>
+
+    </section>
+    <section class="conclusion">
+        <h2>BONUS: Funny bloopers from when I was finetuning the Image Pyramid</h2>
+        <p>
+            These badly aligned images were the result from when I was first fine-tuning my pyramid and figuring out how to pick the best displacement values and the amount of levels.
+            I picked only 3 levels initially, and also forgot to adjust the window size as I was recursing through the different levels. 
+            The extreme misalignment also could have occured because my initial guesses for displacement at the very top of the pyramid were very very wrong. 
+            The NCC could have found a wrong local max at the grainy top level, mistook it for best match instead of the true best displacement, and ran with it throughout the 
+            rest of the pyramid. The bad guess was not only propagarated, but amplified at each next level, creating these very funky results at the end.
+        </p>
+        <div class="gallery">
+            <figure>
+                <img src="bloopers/pyr_ncc_three_generations.jpg" alt="harvesters">
+            </figure>
+            <figure>
+                <img src="bloopers/pyr_ncc_harvesters.jpg" alt="harvesters">
+            </figure>
+            <figure>
+                <img src="bloopers/pyramid_melons-1.jpg" alt="harvesters">
+            </figure>
+        </div>
+        
+    </section>
     </div>
 </body>
 </html>
