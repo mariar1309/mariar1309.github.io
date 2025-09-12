@@ -17,7 +17,7 @@
 
         <!-- Introduction Section -->
         <section class="introduction">
-            <h2>Introduction</h2>
+            <h2>Overview</h2>
             <p> 
             In 1907, Russian chemist and photographer <a href="https://en.wikipedia.org/wiki/Sergey_Prokudin-Gorsky">Sergey Mikhailovich Prokudin-Gorsky
             </a> (1863-1944) [Сергей Михайлович Прокудин-Горский] captured his travels across the Russian Empire using glass plate, 3-channel photography in one of the first pioneer efforts of color photography.
@@ -53,7 +53,7 @@
             </div>
             
             <p class="image-caption">
-                Examples of original glass plate images showing the three BGR color channels stacked vertically.
+                Examples of original glass plate images showing the three BGR color channels
             </p>
         </section>
 
@@ -62,8 +62,8 @@
             <p>
                 Each of Prokudin-Gorskii's glass plates contains three exposures captured through BGR filters that need to be stacked vertically and aligned on top of 
                 one another to reconstruct the original image. In a naive approach, my algorithm dissects the long glass plate into 3 separate shots.
-                Since these exposures were taken sequentially with slight shakes and differences between the shots, the channels are slightly misaligned, and we need to ustively search over 
-                a window of possible displacements to find the perfect fit. The blue channel serves as the reference, with red and green channels aligned to it. Borders arehae cropped
+                Since these exposures were taken sequentially with slight shakes and differences between the shots, the channels are slightly misaligned, and we need to search over 
+                a window of possible displacements to find the perfect fit. The blue channel serves as the reference, with red and green channels aligned to it. Borders are cropped
                 from the channels during alignment to improve accuracy by focusing on the core of the image. The project description suggested using either <b>L2 Norm (Euclidian Distance)</b> or
                 <b>Normalized Cross-Correlation (NCC)</b> for alignment scoring, so I implemented both to compare their performance. 
             </p>
@@ -154,16 +154,27 @@
             <p>
                 While NCC and L2 scoring worked well on the small JPEGs, they both became <b>excruciatingly</b> slow on the full-resolution glass plates. 
                 Searching over a small [-15, 15] pixels in both x and y directions is manageable for small JPEGs, but too computationally expensive for TIFs.
-                To speed this all up, I used multi-scale image pyramid approach, which aligns images across progressively finer resolutions.
+                To speed this all up, I used multi-scale image pyramid approach, which aligns images across progressively finer resolutions. 
+                My implementation constructs a Gaussian pyramid, which is a type of lowpass pyramid, using a recursive approach that processes images from coarsest to finer levels.
             </p>
             <p>
                 The idea is to repeatedly downsample each channel by a factor of 2 until the image is sufficiently small, perform alignment at the coarsest level, and then recursively refine at higher resolutions. 
-                At each level, the displacement is scaled up by a factor of 2 and used as the initial guess, while the search window is narrowed to only a few pixels. 
+                The process begins by recursively downsampling each color channel by a scale of 0.5. This creates progressively smaller versions of each image (see diagram I borrowed from Wikipedia below), with
+                each level reducing the resolution in half in both dimensions. The recursive donwsampling continues until either the final 5th level of the pyramid is constructed, or the image dimensions become smaller than 
+                then minimum window size I set to ensure that the base level window size is manageable.
+            </p>
+            <p>
+                At the grainiest level (the top of pyramid), the alignment is performed using NCC. I chose the NCC as alignment function for the pyramid because it is effective at normalizing the brightness values of image patches
+                by subtracting the mean and dividing by STD, making it strong to the differences in brightness between color channels.
+                The recursive calls to NCC first manage the alignment at the top, coarsest level of the pyramid, where the small image size makes the search very efficient.
+                The optimal displacement vector found and recorded at this level is then scaled up by a factor of 2, and used as the initial estimate for the next level.
+                At each next level, a more refined search is performed around this estimate, progressively improving the alignment. 
+                These steps continue until the original resolution is reached, combining the estimated displacement from grainier levels with the more accurate displacement at the bottom level.
             </p>
             <p>
                 I chose 5 levels for the pyramid. 
                 I originally tried 3 levels, but the coarsest image was still too large, which meant the initial alignment drifted significantly, leading to visible color splotches and misalignment on final results.
-                With 5 levels, the coarsest image is only about 1/2^5 = 1/32 of the original resolution, small enough to quickly establish a reliable global alignment.
+                With 5 levels, the coarsest image is only about 1/2^5 = 1/32 of the original resolution, small enough to compute a quick and effective alignment.
             </p>
             <div class="gallery">
                 <figure>
@@ -281,14 +292,24 @@
             </div>
         </section>
 
+        </section>
         <section class="conclusion">
-            <h2>Sources</h2>
+            <h2>BONUS: Funny bloopers from when I was finetuning the Image Pyramid</h2>
             <p>
-                pyramid is stacking up to be the best (who could have thought)
+                <!--bloopers dscription?-->
             </p>
-            <p>
-                something here
-            </p>
+            <div class="gallery">
+                <figure>
+                    <img src="bloopers/pyr_ncc_three_generations.jpg" alt="harvesters">
+                </figure>
+                <figure>
+                    <img src="bloopers/pyr_ncc_harvesters.jpg" alt="harvesters">
+                </figure>
+                <figure>
+                    <img src="bloopers/pyramid_melons-1.jpg" alt="harvesters">
+                </figure>
+            </div>
+            
         </section>
     </div>
 </body>
