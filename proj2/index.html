@@ -3,6 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS180 Project 2</title>
+    <title>CS180 Project 2 - Fun with Filters and Frequencies</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Project 2: Fun with Filters and Frequencies! </h1>
+            <h3>Exploring Image Processing Techniques (Convolution, Sharpening, Hybrids, Multi-Resolution Blending)</h3>
+            <h3>CS 180 Fall 25 - Maria Rufova</h3>
+        </header>
+
+        <!-- Introduction -->
+        <section class="introduction">
+            <h2>Project Overview</h2>
+            <p>
+                The goal of this project is to explore fundamental image processing techniques through fun hands-on experiments with 
+                convolution, image sharpening, hybrid image creation, and multi-resolution blending. In these exercises, 
+                I manipulated both low- and high-frequency components of images to achieve these results. Part 1 focuses on image filtering, 
+                where I implemented convolutions to detect and enhance image edges. 
+                Part 2 demonstrates the use of Gaussian and Laplacian stacks to sharpen image details, create hybrid crossovers 
+                of two distinct photos, and seamlessly blend images, exemplified by the Oraple example.
+            </p>
+            <p>Referenced Papers:</p>
+            <ul>
+                <li><a href="https://web.archive.org/web/20070315210101/http://cvcl.mit.edu/hybrid/OlivaTorralb_Hybrid_Siggraph06.pdf">Oliva, Torralba & Schyns, 2006,  "Hybrid Images"</a></li>
+                <li><a href="https://persci.mit.edu/pub_pdfs/spline83.pdf">Burt & Adelson, 1983, "The Laplacian Pyramid as a Compact Image Code"</a></li>
+            </ul>
+        </section>
+
+        <!-- Part 1: Fun with Filters -->
+        <section class="part1">
+            <h2>Part 1: Fun with Filters</h2>
+
+            <!-- 1.1 Convolutions from Scratch -->
+            <section class="subsection">
+                <h2>1.1 Convolutions from Scratch</h2>
+                <p>
+                    Here I implemented 2D convolution hands-on (with 4 for loops, then 2 for loops, both with padding) and compared their performance with the built-in convolution function <b>scipy.signal.convolve2d</b>.
+                    The 4 for loop version was pretty straightforward, it directly multiplies and sums filter values over images with zero-padding. The 2 for loop version is similar, but optimized
+                    to extract filter-sized patches and sum the products of their values. 
+                    The boundaries are handled in all 3 variations with zero-padding, meaning that when we put the filter kernel on top of the image, any parts of the 
+                    kernel that extend past the edges of the image are substituted with zeros. This makes the edges of the image a little more blurry and dark because those parts are 
+                    averaged with zeros, but this allows us to perform a complete convolution.
+                    Both implementations gave the same results as <b>scipy.signal.convolve2d</b>, but the scipy function ran much faster!
+                </p>
+
+                <div class="timing-box">
+                    <h4>Box Filter (9x9) Timings</h4>
+                    <ul>
+                        <li>4 for-loop convolution: <b>248.39 s</b></li>
+                        <li>2 for-loop convolution: <b>27.88 s</b></li>
+                        <li>scipy convolve2D: <b>1.18 s</b></li>
+                    </ul>
+                </div>
+
+                <p>
+                    I also tested finite difference operators:
+                </p>
+                <p style="text-align:center;">
+                    \( D_x = \begin{bmatrix} 1 & 0 & -1 \end{bmatrix} \), &nbsp;&nbsp;
+                    \( D_y = \begin{bmatrix} 1 \\ 0 \\ -1 \end{bmatrix} \)
+                </p>
+
+                <div class="timing-box">
+                    <h4>Finite Difference Operator Timings</h4>
+                    <ul>
+                        <li>D<sub>x</sub> with 4 for-loop: <b>11.84 s</b> , D<sub>y</sub> with 4 for-loop: <b>12.72 s</b></li>
+                        <li>D<sub>x</sub> with 2 for-loop: <b>24.99 s</b>, D<sub>y</sub> with 2 for-loop: <b>24.45 s</b></li>
+                        <li>D<sub>x</sub> with convolve2D: <b>0.12 s</b>, D<sub>y</sub> with convolve2D: <b>0.14 s</b></li>
+                    </ul>
+                </div>
+                
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/result_1_1.png" alt="Convolution Process">
+                        <figcaption><b>Original vs Box Filter vs Finite Difference Operator D<sub>x</sub> vs Finite Difference Operator D<sub>y</sub></b></figcaption>
+                        <figcaption><i>Note: Turn up the screen brightness to see edges in D<sub>x</sub> and D<sub>y</sub></i></figcaption>
+                    </figure>
+                </div>
+
+                <div class="snippet-gallery">
+                    <h2>Code Snippets of Convolution Implementations:</h2>
+                    <figure class="snippet">
+                        <img src="./images/4_loops.png" alt="4 for loops">
+                        <figcaption>4 for loop implementation</figcaption>
+                    </figure>
+                    <figure class="snippet">
+                        <img src="./images//2_loops.png" alt="2 for loops">
+                        <figcaption>2 for loop implementation</figcaption>
+                    </figure>
+                    <figure class="snippet">
+                        <img src="./images/convolve2D.png" alt="convolve2D">
+                        <figcaption>Using scipy.signal.convolve2D</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- 1.2 Finite Difference Operators -->
+            <section class="subsection">
+                <h2>1.2 Finite Difference Operators</h2>
+                <p>
+                    By convolving an image (such as the cameraman here) with finite difference operators, we can highlight vertical and horizontal edges in the image.
+                    Using D<sub>x</sub> = [1, 0, 1] emphasizes <b>vertical</b> edges (changes in the x direction), while D<sub>y</sub> = [[1], [0], [-1]] emphasizes
+                    <b>horizontal</b> edges (changes in the y direction).
+                    The resulting images are a bit noisy (this will be improved in Part 1.3!), but overall you can see the edge structure in each.
+                    Combining the two results from using D<sub>x</sub> and D<sub>y</sub>, I computed the gradient magnitude image which captures the overall edge strength in 
+                    all directions.
+                </p>
+
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/result_1_2_a.png" alt="Cameraman Convolutions">
+                        <figcaption>Original Cameraman, dI/dx, dI/dy, Gradient Magnitude</figcaption>
+                    </figure>
+                </div>
+                <p>
+                    <b>Threshold selection:</b> To convert the Gradient Magnitude iamge into a clean binary edge image with a clear cameraman outline, I tested several thresholds.
+                    My testing range includd thresholds between 0.1 to 0.5, but I ultimately settled on 0.2 as it clearly highlighted all edges without picking up
+                    extra noise from the objects in the background. Thresholds lower than that showed too much background detail noise, and thresholds higher than that missed some of the edge details. 
+                </p>
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/result_1_2_b.png" alt="Cameraman Convolutions">
+                        <figcaption></figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- 1.3 Derivative of Gaussian Filters -->
+            <section class="subsection">
+                <h2>1.3 Derivative of Gaussian Filters</h2>
+                <p>
+                    Convolving the original cameraman image with difference operators in Part 1.2 detected the edges, but the results were a bit noisy. 
+                    We improve on this here using a smoothing operator: the Gaussian filter <b>G</b> . 
+                    We use it to first smooth the high frequencies in the image before applying the derivatives. This gets us rid of the high frequency noise while
+                    keeping the necessary edges we want. Here I use <code>cv2.getGaussianKernel()</code> to create a 1D Gaussian to then take an outer product with its transpose
+                    to get a 2D Gaussian Kernel. This gives me the same blurred cameraman image as in Part 2, which convolving with Dx and Dy gives the similar edge images to 
+                    those generated in Part 2, but the difference is that now we have much less background noise. The cameraman edges also appear sharper than before and the 
+                    background noise is less distracting. <i>So yay, good news, smoothing before differentiating gives a better result!</i>
+
+                </p>
+
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/result_1_3_a.png" alt="Cameraman Convolutions">
+                        <figcaption><b>Convolutions with a Gaussian filter created using <code>cv2.getGaussianKernel()</code></b></figcaption>
+                    </figure>
+                </div>
+                <p>
+                    Now we do the same thing with a single convolution instead of 2 by creating a <b>Derivative of Gaussian (DoG) filters</b>. 
+                    I convolved the Gaussian filter itself with D<sub>x</sub> and D<sub>y</sub> to get DoG<sub>x</sub> and DoG<sub>y</sub> filters
+                    and the following resulting images. With visual verification we can see that the results are the same as in the 2-step process above (Gaussian blur + diffrentiation).
+                </p>
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/result_1_3_b.png" alt="Cameraman Convolutions">
+                        <figcaption> <b>Created with a single convolution by creating a Derivative of Gaussian (DoG) filter</b> </figcaption>
+                    </figure>
+                </div>
+            </section>
+        </section>
+
+        <!-- Part 2: Fun with Frequencies -->
+        <section class="part2">
+            <h2>Part 2: Fun with Frequencies</h2>
+
+            <!-- 2.1 Image Sharpening -->
+            <section class="subsection">
+                <h2>2.1 Image Sharpening</h2>
+                <p>
+                    In this part, I "sharpened" (aka enhanced image by adding high frequencies) a blurry image via the <i>unsharp masking technique</i>.
+                    Since Gaussian filter acts as a low passs filter that retains only low frequencies, we can use it to create a blurred version of the image, 
+                    and subtract the blurred version from the original to retain only the highest frequencies. These high frequencies contain edges and fine details of
+                    our image. Then adding these high frequencies to the 
+                    original image (scaled with a constant factor) creates a "sharpening" that enhances every outline in the image. 
+                </p>
+                <p>
+                    In a formula this looks like: 
+                </p>
+                <p style="text-align: center;"> 
+                    <b>f<sub>sharp</sub>(x, y) = f(x, y) + k &middot; (f(x, y) - (f * G)(x, y))</b>
+                </p>
+                <p>
+                    where <i>f(x, y)</i> is the original image, <i>(f * G)(x, y)</i> is the blurred image I got after convolving 
+                    the original with the Gaussian <i>G</i> and k is the scaling constant that controls the intensity of sharpening. 
+                    In my implementation I used <code>k = 1.5</code> because it best highlighted the edges and fine details without
+                    making them too dark and distracting, which happened when I tried to increase k above 1.5.
+                </p>
+
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/result_2_1_a.png" alt="Cameraman Convolutions">
+                        <figcaption><b>Sharpened Taj Mahal</b></figcaption>
+                    </figure>
+                </div>
+                <p>
+                    Demonstration of how varying the sharpening amount <i>k</i> changes the result. A very low scaling factor like k=0.5 hardly brings out any details, 
+                    while a very high k=6.0 brings out too much and makes white walls of Taj Mahal look dirty. I felt like k=1.5 is a happy medium.
+                </p>
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/results_2_1_c.png" alt="Sharpening Comparissons">
+                        <figcaption><b>Comparison of different scaling factors on the sharpening effect</b></figcaption>
+                    </figure>
+                </div>
+                <p>
+                    Here is the same sharpening operation performed on a picture I took of houses in San Francisco. Notice how the borders of walls, windows, stairs, 
+                    and decorative details become more enhanced. 
+                </p>
+                <div class="gallery">
+                    <figure class="wide-figure">
+                        <img src="./images/result_2_1_b.png" alt="Cameraman Convolutions">
+                        <figcaption><b>Sharpened Houses in San Francisco</b></figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- 2.2 Hybrid Images -->
+            <section class="subsection">
+                <h2>2.2 Hybrid Images</h2>
+                <p>
+                    In this part I created a hybrid of 2 separate images using the approach introduced in <a href="https://web.archive.org/web/20070315210101/http://cvcl.mit.edu/hybrid/OlivaTorralb_Hybrid_Siggraph06.pdf">Oliva, Torralba & Schyns, 2006,  "Hybrid Images"</a>
+                    In the paper, the authors show how combining low frequencies of one image with high frequencies of another can create a hybrid that changes in interpretation
+                    depending on one's viewing distance. One image will be dominant when viewed up close, and the other when viewed from standing father away.
+                </p>
+
+                <div class="hybrid-process">
+                    <h4>Hybrid Image Creation Process</h4>
+                    <p>
+                        Example images of Derek and the cat Nutmeg were provided for me in the project spec. 
+                        The goal is to make a hybrid such that Nutmeg is seen up close and Derek's face is seen from farther away. 
+                        Meaning, we need the hybrid to retain high frequencies from Nutmeg and low frequencies from Derek. 
+                        To do this, we first load the originals, and align them so that their key features (like eyes, nose, face contours) match up.
+                        Good alignment is important for making the final hybrid more effective. 
+                        I also worked in grayscale for this to make my hybrids more clearly distinguished.
+                    </p>
+                    <div class="gallery">
+                        <figure>
+                            <img src="derek_nutmeg/derek_og.png" alt="Derek">
+                            <figcaption>Derek Original</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="derek_nutmeg/nutmeg_og.png" alt="Nutmeg">
+                            <figcaption>Nutmeg Original</figcaption>
+                        </figure>
+                    </div>
+                    <p>
+                        The hybrid below was created by applying a low-pass Gaussian filter (sigma1 = 12) to Derek's photo and a high-pass filter (sigma2 = 9) to Nutmeg's photo. 
+                        I experimented with a bunch of cutoff frequencies, but ultimately settled on these because they blended the two images the best without making 
+                        either one too dominant. 
+                        Smaller values for Derek (5-10) left too many high-frequency details that didn't make Nutmeg clear enough up close, while values much larger than 12 blurred him so much
+                        that he looked just like a gray blob from a distance. For Nutmeg, I felt like values larger than 9 removed too many important details and smaller values
+                        kept too many low-frequency details that made him easily seen even from far away.
+
+                        Putting them together produces a hybrid where Nutmeg dominates at close range and Derek at far range.
+                    </p>
+                    <div class = "gallery">
+                        <figure>
+                            <img src="derek_nutmeg/derek_nutmeg_hybrid.png" alt="Hybrid">
+                            <figcaption>Aligned + Hybrid: Derek (low frequencies, seen from far away) + Nutmeg (high frequencies, seen from up close) </figcaption>
+                        </figure>
+                    </div>
+                    <p>
+                        The Fourier spectrum below shows the frequency distribution of the hybrid. The bright areas you can see in the center of the hybrid (shown isolated in "Low Pass Im1")
+                        correspond to low frequencies collected from Derek's image, capturing his overall face shape and feature without extremely fine details.
+                        The brighter areas spread further from the hybrid center (shown isolated in "High Pass im2") are the high frequencies collected from Nutmeg's image, capturing a lot of 
+                        his finer features seen up close. Hybrid combines both of these frequencies: Derek's low ones forming the "axis" in the center, and Nutmeg's high ones spread out around. 
+                    </p>
+                    <div class = "gallery">
+                        <figure>
+                            <img src="derek_nutmeg/derek_nutmeg_freqs.png" alt="Frequencies">
+                            <figcaption>Fourier Spectrum of the Hybrid Image</figcaption>
+                        </figure>
+                    </div>
+                </div>
+
+                <div class="hybrid-gallery">
+                    <h2>Additional Hybrid Images</h2>
+                    <h4>My sister (Anya) and I. We have similar features so this works well! </h4>
+                    <div class = "gallery">
+                        <figure>
+                            <img src="images/me_anya_hybrid.png" alt="Hybrid">
+                        </figure>
+                    </div>
+                    <div class = "gallery">
+                        <figure>
+                            <img src="images/me_anya_freqs.png" alt="Frequencies">
+                            <figcaption>Anya + Masha Fourier Spectrum</figcaption>
+                        </figure>
+                    </div>
+                    <h4>My neighbors' dog Sheldon before and after his bath</h4>
+                    <div class = "gallery">
+                        <figure>
+                            <img src="images/sheldon_hybrid.png" alt="Hybrid">
+                        </figure>
+                    </div>
+                    <h4>I went to a concert, and this musician played both the acoustic and the electric guitar: </h4>
+                    <div class = "gallery">
+                        <figure>
+                            <img src="images/guitars_hybrid.png" alt="Hybrid">
+                        </figure>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2.3 Gaussian and Laplacian Stacks -->
+            <section class="subsection">
+                <h2>2.3 Gaussian and Laplacian Stacks</h2>
+                <p>
+                    In this part I reference the <a href="https://persci.mit.edu/pub_pdfs/spline83.pdf">Burt & Adelson, 1983, "The Laplacian Pyramid as a Compact Image Code"</a> paper
+                    to recreate the Oraple (Orange + Apple) example they use there. To perform this multi-resolution blending, I used Gaussian and Laplacian stacks.
+                    A Gaussian stack is similar to a Gaussian pyramid we used previoously, but this time each level is the same size as the next. Each level is still more blurrier than the previous, 
+                    capturing increasingly low frequency content while retaining the same dimensinos. 
+                    Laplacian stack is derived directly from a Gaussian stack via subtracting each level from the next, isolating the high-frequency details at each step. 
+                    To seamlessly blend the fruits, I created a Gaussian and a Laplacian stack for each of the photos, plus another Gaussian stack for a mask filter to aid with the blending.
+                    At each level, the levels of the Laplacian stacks were combined with the help of the mask, blending the low and the high frequency components from the two images together.
+                    The final blended image was the outcome of summing the Laplacian levels from highest to lowest, resulting in the smooth central vertical blend that still preserved the fine 
+                    details of both the orange and the apple on the sides.
+                </p>
+                <p>
+                    Below is a recreation of Oraple Laplacian Pyramid Blending Details Figure 3.42 in Szelski (Ed 2) page 167. Just like in the original figure, I showed 
+                    the high, medium, and low frequency parts of the Laplacian pyramid taken from levels 0, 2, 4, as well as the final blended Oraple.
+                </p>
+
+                <div class="stack-visualization">
+                    <h4>Oraple Visualization </h4>
+                    <div class="gallery">
+                        <figure>
+                            <img src="images/apple.jpeg" alt="Oraple Figure 3.42 recreation">
+                            <figcaption>Original Apple Image</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="images/orange.jpeg" alt="Oraple Figure 3.42 recreation">
+                            <figcaption>Original Orange Image</figcaption>
+                        </figure>
+                    </div>
+                    <div class="gallery">
+                        <figure>
+                            <img src="images/result_2_3.png" alt="Oraple Figure 3.42 recreation">
+                            <figcaption>Laplacian pyramid blending details ( recreation of Figure 3.42 from <i>Szelski (Ed 2) page 167 </i>)</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2.4 Multi-resolution Blending -->
+            <section class="subsection">
+                <h2>2.4 Multi-resolution Blending</h2>
+                <p>
+                    
+                </p>
+
+                <div class="creative-blends">
+                    <h4>Using the stacks from part 2.3, here are some more examples of joining two images using Multiresolution Blending!</h4>
+
+                    <div class="blend-example">
+                        <h5>More Vertical / Horizontal Blends</h5>
+                        <p>Benches outside of Dwinelle</p>
+                        <div class="gallery">
+                            <figure>
+                                <img src="images/benches_1.jpg" alt="Benches 1">
+                                <figcaption>Bench 1</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="images/benches_2.jpg" alt="Benches 2">
+                                <figcaption>Bench 2</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="images/benches_blend.png" alt="Benches Blend">
+                                <figcaption>Benches Blend </figcaption>
+                            </figure>
+                        </div>
+                        <p>My friends photographed these Northern Lights in Washington state this summer!</p>
+                        <div class="gallery">
+                            <figure>
+                                <img src="images/lights_1.jpg" alt="Northern Lights 1">
+                                <figcaption>Northern Lights 1</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="images/lights_2.jpg" alt="Northern Lights 1">
+                                <figcaption>Northern Lights 2</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="images/lights.png" alt="Northern Lights Blend">
+                                <figcaption>Northern Lights Vertical Blend</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                    
+                    <div class="blend-example">
+                        <h5>Irregular Mask Blend</h5>
+                        <p>I thougth a picture of this very round cat I have would fit well inside the 
+                            picture of this very round moon I found in Exploratorium.
+                        </p>
+                        <div class="gallery">
+                            <figure>
+                                <img src="images/cat-min.jpg" alt="Cat">
+                                <figcaption>A Cat</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="images/moon.jpg" alt="Moon">
+                                <figcaption>A Moon</figcaption>
+                            </figure>
+                            <figure>
+                                <img src="images/cat_moon_1.png" alt="Cat Moon">
+                                <figcaption>A Cat Moon</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Conclusion -->
+        <section class="conclusion">
+            <h2>Conclusion</h2>
+            <p>
+                This was very difficult but very insightful! I have a newfound respect for people who make tools like Photoshop happen.
+            </p>
+        </section>
+    </div>
+</body>
+</html>
