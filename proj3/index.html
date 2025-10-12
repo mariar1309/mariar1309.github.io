@@ -3,19 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS180 Project 3 - (Auto)stitching and Photo Mosaics</title>
+    <title>CS180 Project 3 - Image Warping and Mosaicing</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
-<body>   
+<body>
     <div class="container">
         <!-- Project Title -->
         <header class="header">
-            <h1>Project 3: (Auto)stitching and Photo Mosaics </h1>
-            <h2>Stitching together many photographs to create larger composite images. </h2>
-            <h3>Part 1: Capturing source photos, defining correspondences, warping and composing them. </h3>
-            <h3>Part 2: Automating correspondense-finding portion to create panoramas automatically </h3>
-            <h4>CS 180 Fall 25 - Maria Rufova</h4>
+            <h1>Project 3A: Image Warping and Mosaicing</h1>
+            <h3>CS 180 Fall 2025 – Maria Rufova</h3>
         </header>
+
+        <!-- Introduction -->
+        <section class="introduction">
+            <h2>Introduction</h2>
+            <p>
+                This is part 1 of a larger project about <b>[Auto]Stitching Photo Mosaics</b>. This <b>Part A</b> covers capturing source photographs, 
+                defining correspondences, and warping and compositing them. <b>Part B</b> will be added later and will handle automating the 
+                correspondence-finding portion of Part 1 so that we can create panoramas automatically. 
+            </p>
+            <p>
+                The goal of Part A here was to gain familiarity with image earping and mosaicing to create panoramic images from multiple photographs.
+                By computing homographies, warping images into alignment, and aiding with blending them together, I reconstrcted larger view of a scene
+                using smaller overlapping features from individual photos. 
+            </p>
+        </section>
+
+        <!-- Table of Contents -->
+        <section class="subsection">
+            <h2>Table of Contents</h2>
+            <div>
+                <ul>
+                    <li>A1: Shoot the Pictures</li>
+                    <li>A2: Recover Homographies</li>
+                    <li>A3: Warp the Images</li>
+                    <li>A4: Blend the Images into a Mosaic</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- A1: Shoot the Images -->
+        <section class="part1">
+            <h2>A1: Shoot the Images</h2>
+            <p>
+                The first step was to capture several sets of overlapping photographs so that the transforms between them are projective.
+                 Each pair of images shares at least 50% overlap and was taken from a fixed center of projection (COP) where camera was rotate while capturing photos.
+            <div class="gallery">
+                <figure>
+                    <img src="photos/rose_garden_1.jpg" alt="RG1">
+                    <img src="photos/rose_garden_2.jpg" alt="RG2">
+                    <figcaption>Berkeley Rose Garden</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/stairs_1-min.jpg" alt="S1">
+                    <img src="photos/stairs_2-min.jpg" alt="S2">
+                    <figcaption>Campus Stairs</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/berk_1.jpg" alt="D1">
+                    <img src="photos/berk_2.jpg" alt="D2">
+                    <figcaption>Doe and East Asian Libraries</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- A2: Recover Homographies -->
+        <section class="part2">
+            <h2>A2: Recover Homographies</h2>
+            <p>
+                First we need to recover the parameters of transformation between each pair of images. 
+                I recoverred the homography matrix \( H \) that defines the projective transformation between the each pair. 
+                A homography maps points from one plane to another according to \( p' = H p \), where  \( H \)  is a 3x3 matrix with 
+                8 degrees of freedom (since it is defined up to scale). To computre  \( H \), we first identify <i>correspondence points</i>, which are 
+                just pairs of matching features between images. Each correspondence gives 2 equations, and with 4 (or more!) correspondences we can 
+                set up a linear system \( Ah = b \), where h is the vectorized form of unknown homography elements. 
+                We solve this overdetermined system using least squares, see the work computed below. 
+                This process allows us to align the images accurately so they can later be warped and blended into a mosaic. 
+            </p>
+            <p>
+                The equation that relates corresponding points is given by:
+            </p>
+            <p style="text-align: center;">
+                \( p' = H p \quad \text{where} \quad H =
+                \begin{bmatrix}
+                h_{11} & h_{12} & h_{13} \\
+                h_{21} & h_{22} & h_{23} \\
+                h_{31} & h_{32} & 1
+                \end{bmatrix} \)
+            </p>
+            <p style="text-align:center;">
+                \[
+                \begin{bmatrix}
+                w x' \\[3pt]
+                w y' \\[3pt]
+                w
+                \end{bmatrix}
+                =
+                H
+                \begin{bmatrix}
+                x \\[3pt]
+                y \\[3pt]
+                1
+                \end{bmatrix}
+                \quad \text{where} \quad
+                H =
+                \begin{bmatrix}
+                h_{11} & h_{12} & h_{13} \\
+                h_{21} & h_{22} & h_{23} \\
+                h_{31} & h_{32} & h_{33}
+                \end{bmatrix}.
+                \]
+            </p>
+            
+            <p>
+                This gives us the equations:
+            </p>
+            
+            <p style="text-align:center;">
+                \[
+                x' = \frac{h_{11}x + h_{12}y + h_{13}}{h_{31}x + h_{32}y + h_{33}}, 
+                \qquad
+                y' = \frac{h_{21}x + h_{22}y + h_{23}}{h_{31}x + h_{32}y + h_{33}}.
+                \]
+            </p>
+            
+            <h3>Linear System Setup</h3>
+            <p>
+                To solve for values of \( H \), we rearrange these nonlinear equations into a linear system. 
+                For each point correspondence \((x, y) \leftrightarrow (x', y')\), we get two equations:
+            </p>
+            
+            <p style="text-align:center;">
+                \[
+                x'(h_{31}x + h_{32}y + h_{33}) = h_{11}x + h_{12}y + h_{13}
+                \]
+                \[
+                y'(h_{31}x + h_{32}y + h_{33}) = h_{21}x + h_{22}y + h_{23}
+                \]
+            </p>
+            
+            <p>
+                These can be rewritten in matrix form as:
+            </p>
+            
+            <p style="text-align:center;">
+                \[
+                \begin{bmatrix}
+                x & y & 1 & 0 & 0 & 0 & -x x' & -y x' & -x' \\
+                0 & 0 & 0 & x & y & 1 & -x y' & -y y' & -y'
+                \end{bmatrix}
+                \begin{bmatrix}
+                h_{11}\\h_{12}\\h_{13}\\h_{21}\\h_{22}\\h_{23}\\h_{31}\\h_{32}\\h_{33}
+                \end{bmatrix}
+                = 
+                \begin{bmatrix}
+                0 \\ 0
+                \end{bmatrix}.
+                \]
+            </p>
+            
+            <p>
+                Stacking equations from \( n \) correspondences gives us a \( 2n \times 9 \) system \( A h = 0 \).
+                Since \( H \) is defined up to scale, we solve for the vector \( h \) that minimizes \( \|A h\| \) subject to \( \|h\| = 1 \).
+                We can find the solution using Singular Value Decomposition (SVD).
+                We then reshape \( h \) into a 3×3 matrix to obtain the final homography:
+            </p>
+            
+            <p style="text-align:center;">
+                \[
+                H =
+                \begin{bmatrix}
+                h_{11} & h_{12} & h_{13} \\
+                h_{21} & h_{22} & h_{23} \\
+                h_{31} & h_{32} & h_{33}
+                \end{bmatrix}.
+                \]
+            </p>
+            
+            <p>
+                Because human-selected correspondences contain noise, using more than four points produces an 
+                <strong>overdetermined system</strong>, and the least-squares SVD solution ensures the best overall fit.
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/rose_corrs.jpg" alt="RC">
+                    <img src="photos/stairs_corrs.jpg" alt="SC">
+                    <img src="photos/berk_corrs.jpg" alt="BC">
+                    <figcaption>Correspondences Visualized on Images</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- A3: Warp the Images -->
+        <section class="part3">
+            <h2>A3: Warp the Images</h2>
+            <p>
+                Now that we know the parameters of the homography, we can use it to warp each image toward the reference image. 
+                I implemented iamge warping using 2 separate interpolation methods: Nearest Neighbor Interpolation and Bilinear Interpolation. 
+                Both methods determine how thee pixels values in the warped image are computed based of their corresponding positions in the source image
+                after applying the homography. 
+            </p>
+            <p>
+                <b>Nearest Neighbor Interpolation:</b> I started with this simpler method, it assigns each warped pixel the value of the closest source pixel. 
+                For eaxch pixel in the warped iamge, finds the closeest pixel in the original image and directly copies its color value. 
+                This approach is fast and computationally efficient, but can lead to jagged edges, especially when the image is enlarged or rotated.
+            </p>
+            <p>
+                <b>Bilinear Interpolation:</b> This method was a little more complex, but it produced smoother results. 
+                Essentially, instead of picking just one nearby matching pixel, we consider the 4 nearest neighboring pixels and calculate the output color as a weighted
+                average based on their distance from the warped pixel. This blending of surrounding values helps preserve fine details and reduce aliasing, making
+                it better suited for complicated mosaicing. 
+            </p>
+            <p>
+                <b>A Note on Inverse Warping:  </b>We were guided to use inverse warping instead of forward warping. 
+                Forward warping would involve mapping each pixel from the original image onto a new location in the output image.
+                Inverse warping does the opposite: for every pixel in the warped image, it determined where it originaated in the 
+                source image by using the inverse of the homography matrix. This fixes the "holes" problem we sometimes get with forward warping, which  is 
+                missing pixels in the destination image, which may often happen when we are scaling up and the source pixels may not be enough to fill all of destination pixels.
+                On the contrary, inverse warping guarantees that every destination pixel has a source pixel from which it is translated, leaving no gaps in the final output.
+            </p>
+            <p>
+                <b>Trade-offs between speed and quality: </b>
+                Nearest Neighbors is faster since it only references 1 pixel per computation, but it sacrificies visual smoothness. 
+                Bilinear interpolation is smaller because its computation relies on 4 pixels every turn and uses weighted averaging. However, this produces
+                results with smoother, better quality since we are able to determine pixel values more accurately. 
+            </p>
+            <p>
+                <b>Rectification: </b>
+                I demonstrated the use of these 2 interpolation methods by rectifying images of rectangular objects. 
+                REctification transforms a tilted or rotated image of a rectangular object into front-facing view. 
+                We select 4 corner correspondences on a planar surface (postcard, planner, book) and map them to the corners of a perfect rectangle/square. 
+                This lets us "unwarp" the image so that it looks like the photo of the rectangular object was taken at a right angle. 
+            </p>
+            <p>
+                Below are 3 examples of rectified images demonstrating both interpolation methods: 
+            </p>
+            
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/postcard.jpg" alt="aaaa">
+                    <figcaption>Postcard</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/planner.jpg" alt="aaaa">
+                    <figcaption>Planner</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/book.jpg" alt="aaaa">
+                    <figcaption>Book</figcaption>
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="photos/postcard_rectified.png" alt="Rectified Image 2">
+                    <img src="photos/planner_rectification.png" alt="Rectified Image 2">
+                    <img src="photos/book_rectified.png" alt="Rectified Image 2">
+                </figure>
+            </div>
+        </section>
+
+        <!-- A4: Blend into a Mosaic -->
+        <section class="part4">
+            <h2>A4: Blend into a Mosaic</h2>
+            <p>
+                For warping, we use the computed homography to project one of the images into the coordinate frame of another so that the 
+                corresponding points in both align well. I leave one of the images unwarped as the reference and warp the other one into this reference. 
+                Aftger the homography is applied, the warped image is mapped onto a new larger canvas that's large aneough to display the whole mosaic. 
+                The position of each new destination pixel is determined by transforming the original image with the homography matrix.
+                The corners of the warped and the reference iamge are used to calculate the larger mosaic size.
+                After warping, we also need to blend the images to make the mosaic seamless using <code>blending()</code> function. 
+                The function identifies the overlapping region between the warped and the reference images and applied an alpha blending mask to create a smooth 
+                unnoticeable transition. 
+            </p>
+            <p>
+                Examples of mosaics on source images seen in A1:
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/rose_mosaic_final.jpg" alt="RM">
+                    <figcaption>Berkeley Rose Garden</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/stairs_mosaic_final.jpg" alt="SM">
+                    <figcaption>Campus Stairs</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/berk_mosaic_final.jpg" alt="BM">
+                    <figcaption>Doe and East Asian Libraries</figcaption>
+                </figure>
+            </div>
+        </section>
     </div>
 </body>
+</html>
