@@ -270,13 +270,13 @@
             <h2>A4: Blend into a Mosaic</h2>
             <p>
                 For warping, we use the computed homography to project one of the images into the coordinate frame of another so that the 
-                corresponding points in both align well. I leave one of the images unwarped as the reference and warp the other one into this reference. 
+                corresponding points in both align well. I warped both of the images into a onto a new projection.
                 Aftger the homography is applied, the warped image is mapped onto a new larger canvas that's large aneough to display the whole mosaic. 
                 The position of each new destination pixel is determined by transforming the original image with the homography matrix.
                 The corners of the warped and the reference iamge are used to calculate the larger mosaic size.
-                After warping, we also need to blend the images to make the mosaic seamless using <code>blending()</code> function. 
-                The function identifies the overlapping region between the warped and the reference images and applied an alpha blending mask to create a smooth 
-                unnoticeable transition. 
+                After warping, we also need to blend the images to make the mosaic seamless using blending() function. 
+                The function makes smooth alpha masks for each iamge that sets it to 1 at the center of each (unwarped) image and makes it fall off 
+                linearly until it hits 0 at the edges.
             </p>
             <p>
                 Examples of mosaics on source images seen in A1:
