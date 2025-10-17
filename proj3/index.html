@@ -317,7 +317,27 @@
         <section class="partB1">
             <h2>B1: Harris Corner Detection</h2>
             <p>
-                something something something
+                I detected the interest points needed for automatic mosaic stitching using Harris corner detection.
+                Harris corner detection identifies interest points by looking for "corners", aka points where intensity changes rapidly in multiple directions.
+                These interest points are easily distinguished, making it easy to find the same correspondence points between 2 images we are trying to mosaic.
+                My function <code>detect_harris</code> performs the basic Harris detection. It returns the corner strength map <code>h</code> and the coordinates 
+                <code>coords</code> of detected corners, while visualizing the results:
+                <code> h, coords_no_anms = detect_harris(im)</code> .
+            </p>
+            <p>
+                This method finds many interest points for us, but perhaps too many. It creates a lot of dense regions that can be easily captured with less interest points, saving us some computational expense. 
+                To reduce computational expenses and restrict max amount of chosen points, I applied <b>Adaptive Non-Maximal Suppression (ANMS)</b> to select a more evenly distributed set of strong interest points, as described in Sections 2 and 3 of the Brown et al. paper.  
+                ANMS works by computing a suppression radius \( r_i \) for each corner, which measures the distance to the nearest stronger corner. then we only keep corners with the strongest suppression radii.   
+            </p>
+            <p style="text-align:center;">
+               I used suppression radii formula given in the paper:
+                \[
+                r_i = \min_j |x_i - x_j|, \quad \text{s.t. } f(x_i) < c_\text{robust} f(x_j), \; x_j \in I
+                \]
+                where \( f(x) \) is the Harris corner strength at location \( x \), \( I \) is the set of all detected corners, and \( c_\text{robust} = 0.9 \) in a constant that ensures that a neighboring corner must have significantly higher strength for suppression to take place.  
+            </p>
+            <p>
+                Same as in the paper, I used <code> N = 500 </code> strongest interest points:    <code> coords_with_anms = harris_with_anms(h, coords_no_anms, n_ir=500, c_robust=0.9)</code>
             </p>
 
             <div class="gallery">
@@ -344,7 +364,13 @@
         <section class="partB2">
             <h2>B2: Feature Descriptor Extraction</h2>
             <p>
-                skjdhfsfhkdhs
+                After I computed a valid set of Harris corners, I used it to extract local feature descriptors from both images that can be reliably matched from one to another.
+                This part follows Section 4 of the Brown et al. paper, and I visualized the example patches in grayscale to better see the intensity changes. 
+                For each corner/interest point, I first cropped a 40x40 window around it (corner / i. p. is at the center), applying some image bounds to make sure the window stays within original iamge.
+                I then reduced this window to an 8x8 patch by taking every 5th pixel, producing a lower resolution representation of this area, but one that is more 
+                computationally efficient for our use. Each patch was also normalized to make it robust to brightness changes. 
+                At the end, every 8x8 descriptor patch is flattened into a 64-dimensional vector for later use.
+
             </p>
 
             <div class="gallery">
@@ -382,7 +408,12 @@
         <section class="partB3">
             <h2>B3: Feature Matching</h2>
             <p>
-                AAAAAAASFhgdasjgdvfbksejdhfncvbgw
+                After collecting descriptor patches from each interest point, I used them to match features between iamge pairs bycomparing the 64-dimensional
+                descriptor vectors. For this I used nearest-neighbor matching with Lowe's ratio test. For every descriptor from first image in the pair, I computed the Euclidian distance to all descriptors in the second image in the pair
+                and selected the closest match. I proceeded in such manner until all descriptors are paired up. 
+                A match was accepted only if the distance to the closest neighbor is less than 0.6 times the distance to the second closest neighbor (<code>lowes_ratio = 0.6</code>).
+                This threshold helps remove unreliable correspondences, keeping only the strongest matches for our RANSAC calculation later.
+                I visualized the resulting set of matches by drawing lines between matched points below:
             </p>
 
             <div class="gallery">
@@ -409,7 +440,15 @@
         <section class="partB4">
             <h2>B4: RANSAC for Robust Homography</h2>
             <p>
-                skjdhfsfhkdhs
+                It is possible that Feature Matching algorithm in B3 could have made a few mistakes and mismatches.
+                To handle any of tose mistakes, I used 4-point RANSAC (Random Sample Consensus) to create a robust homography between each pair of images.
+                At each iteration of the algorithm, I randomly sampled 4 matches in the image pair to compute a candidate homography. 
+                All matches were then reprojected using this candidate H, and points whose Euclidian error was below the inlier threshold of 2.0 pixels were counted as inliers.
+                After 4000 iterations, the best homography with the largest amount of inliers was selected as the final homography for the mosaic. The final
+                homography was then recomputed using all inliers to improve accuracy.
+
+                This method proved better than manual stitching because it effectively rejected outlier matches that could distort image alignment. Using RANSAC, the outcome mosaics
+                came out cleanr and better aligned, producing less distorted final results than I got at the end of Part A.
             </p>
 
             <div class="gallery">
