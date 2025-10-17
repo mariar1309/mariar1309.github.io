@@ -19,14 +19,18 @@
         <section class="introduction">
             <h2>Introduction</h2>
             <p>
-                This is part 1 of a larger project about <b>[Auto]Stitching Photo Mosaics</b>. This <b>Part A</b> covers capturing source photographs, 
-                defining correspondences, and warping and compositing them. <b>Part B</b> will be added later and will handle automating the 
-                correspondence-finding portion of Part 1 so that we can create panoramas automatically. 
+                This is a larger project about <b>[Auto]Stitching Photo Mosaics</b>. First <b>Part A</b> covers capturing source photographs, 
+                defining correspondences, and warping and compositing them. <b>Part B</b> uses the RANSAC algorithm to automate
+                the correspondence-finding portion of Part A so that we can create panoramas automatically. 
             </p>
             <p>
-                The goal of Part A here was to gain familiarity with image earping and mosaicing to create panoramic images from multiple photographs.
+                The goal of Part A was to gain familiarity with image earping and mosaicing to create panoramic images from multiple photographs.
                 By computing homographies, warping images into alignment, and aiding with blending them together, I reconstrcted larger view of a scene
                 using smaller overlapping features from individual photos. 
+            </p>
+            <p>
+                The goal of Part B was to automate the mosaic creation process through Harris corner detection (with ANMS) and the RANSAC algorithm. I used the same
+                photos as in Part A to create the mosaics here.
             </p>
         </section>
 
@@ -41,10 +45,22 @@
                     <li>A4: Blend the Images into a Mosaic</li>
                 </ul>
             </div>
+            <div>
+                <ul>
+                    <li>B1: Harris Corner Detection</li>
+                    <li>B2: Feature Descriptor Extraction</li>
+                    <li>B3: Feature Matching</li>
+                    <li>B4: RANSAC for Robust Homography</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="subsection">
+            <h1>Part A: Image Warping and Mosaicing</h1>
         </section>
 
         <!-- A1: Shoot the Images -->
-        <section class="part1">
+        <section class="partA1">
             <h2>A1: Shoot the Images</h2>
             <p>
                 The first step was to capture several sets of overlapping photographs so that the transforms between them are projective.
@@ -69,7 +85,7 @@
         </section>
 
         <!-- A2: Recover Homographies -->
-        <section class="part2">
+        <section class="partA2">
             <h2>A2: Recover Homographies</h2>
             <p>
                 First we need to recover the parameters of transformation between each pair of images. 
@@ -181,11 +197,6 @@
                 \]
             </p>
             
-            <p>
-                Because human-selected correspondences contain noise, using more than four points produces an 
-                <strong>overdetermined system</strong>, and the least-squares SVD solution ensures the best overall fit.
-            </p>
-
             <div class="gallery">
                 <figure>
                     <img src="photos/rose_corrs.jpg" alt="RC">
@@ -197,7 +208,7 @@
         </section>
 
         <!-- A3: Warp the Images -->
-        <section class="part3">
+        <section class="partA3">
             <h2>A3: Warp the Images</h2>
             <p>
                 Now that we know the parameters of the homography, we can use it to warp each image toward the reference image. 
@@ -266,7 +277,7 @@
         </section>
 
         <!-- A4: Blend into a Mosaic -->
-        <section class="part4">
+        <section class="partA4">
             <h2>A4: Blend into a Mosaic</h2>
             <p>
                 For warping, we use the computed homography to project one of the images into the coordinate frame of another so that the 
@@ -296,6 +307,144 @@
                     <figcaption>Doe and East Asian Libraries</figcaption>
                 </figure>
             </div>
+        </section>
+
+        <section class="subsection">
+            <h1>Part B: Feature Matching for Autostitching</h1>
+        </section>
+
+        <!-- B1: Harris Corner Detection -->
+        <section class="partB1">
+            <h2>B1: Harris Corner Detection</h2>
+            <p>
+                something something something
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b1_rose_b.jpeg" alt="rose_harris">
+                    <figcaption>Berkeley Rose Garden Harris Detection w/ and w/o ANMS</figcaption>
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b1_stairs_b.jpeg" alt="stairs_harris">
+                    <figcaption>Campus Stairs Harris Detection w/ and w/o ANMS</figcaption>
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b1_berk_b.jpeg" alt="berk_harris">
+                    <figcaption>Doe and East Asian Libraries Harris Detection w/ and w/o ANMS</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- B2: Feature Descriptor Extraction -->
+        <section class="partB2">
+            <h2>B2: Feature Descriptor Extraction</h2>
+            <p>
+                skjdhfsfhkdhs
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b2_rose_patches.jpeg" alt="patches">
+                </figure>
+                <figure>
+                    <img src="photos/b2_rose_12.jpeg" alt="patches_on_photo">
+                    <figcaption>Rose Garden Descriptor Patches Locations</figcaption>
+                </figure>
+            </div>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b2_stairs_patches.jpeg" alt="patches">
+                </figure>
+                <figure>
+                    <img src="photos/b2_stairs_12.jpeg" alt="patches_on_photo">
+                    <figcaption>Campus Stairs Descriptor Patches Locations</figcaption>
+                </figure>
+            </div>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b2_berk_patches.jpeg" alt="patches">
+                </figure>
+                <figure>
+                    <img src="photos/b2_berk_12.jpeg" alt="patches_on_photo">
+                    <figcaption>Doe and East Asian Libraries Descriptor Patches Locations</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- B3: Feature Matching -->
+        <section class="partB3">
+            <h2>B3: Feature Matching</h2>
+            <p>
+                AAAAAAASFhgdasjgdvfbksejdhfncvbgw
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b3_rose.jpeg" alt="rose featute matching">
+                    <figcaption>Rose Garden Feature Matching</figcaption>
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b3_stairs.jpeg" alt="stairs feature matching">
+                    <figcaption>Campus Stairs Feature Matching</figcaption>
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b3_berk.jpeg" alt="berk feature matching">
+                    <figcaption>Doe and East Asian Feature Matching</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- B4: RANSAC for Robust Homography -->
+        <section class="partB4">
+            <h2>B4: RANSAC for Robust Homography</h2>
+            <p>
+                skjdhfsfhkdhs
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/rose_mosaic_final.jpg" alt="rose manual">
+                    <figcaption>Manual Stitching</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/b4_mosaic_rose.jpg" alt="rose auto">
+                    <figcaption>Auto Stitching w/ RANSAC</figcaption>
+                </figure>      
+            </div>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/stairs_mosaic_final.jpg" alt="stairs manual">
+                    <figcaption>Manual Stitching</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/b4_mosaic_stairs.jpg" alt="stairs auto">
+                    <figcaption>Auto Stitching w/ RANSAC</figcaption>
+                </figure>      
+            </div>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/berk_mosaic_final.jpg" alt="berk manual">
+                    <figcaption>Manual Stitching</figcaption>
+                </figure>
+                <figure>
+                    <img src="photos/b4_mosaic_berk.jpg" alt="berk auto">
+                    <figcaption>Auto Stitching w/ RANSAC</figcaption>
+                </figure>      
+            </div>
+
         </section>
     </div>
 </body>
