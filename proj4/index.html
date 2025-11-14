@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Project 4 - Neural Radiance Field! (NeRF)</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Project Title -->
+        <header class="header">
+            <h1>Project 4: Neural Radiance Field! (NeRF)</h1>
+            <h3>CS 180 Fall 2025 – Maria Rufova</h3>
+        </header>
+
+        <!-- Introduction -->
+        <section class="introduction">
+            <h2>Introduction</h2>
+            <p>
+                Introduction about nerf, link to this paper: https://www.matthewtancik.com/nerf
+            </p>
+
+        </section>
+
+        <!-- Table of Contents -->
+        <section class="subsection">
+            <h2>Table of Contents</h2>
+            <div>
+                <ul>
+                    <li>Part 0: Calibrating Your Camera and Capturing a 3D Scan</li>
+                    <li>Part 1: Fit a Neural Fit to a 2D Image</li>
+                    <li>Part 2: Fit a Neural Radiance Field from Multi-view Images</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="subsection">
+            <h1>Part 0: Calibrating Your Camera and Capturing a 3D Scan</h1>
+        </section>
+
+        <!-- Part 0.1: Calibrating Your Camera -->
+        <section class="partA1">
+            <h2>Part 0.1: Calibrating Your Camera</h2>
+            <p>
+                Talk very briefly about calibrating camera, explain what ARUCOs are etc. No need to imclude images here. 
+            </p>
+        </section>
+
+        <!-- Part 0.2: Capturing a 3D Object Scan -->
+        <section class="partA2">
+            <h2>Part 0.2: Capturing a 3D Object Scan</h2>
+            <p>
+                Talk briefly about capturing a 3D object scan, example images are seen below.
+            </p>
+            
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/IMG_4332.jpeg" alt="one">
+                </figure>
+                <figure>
+                    <img src="web_images/IMG_4352.jpeg" alt="two">
+                </figure>
+                <figure>
+                    <img src="web_images/IMG_4362.jpeg" alt="three">
+                </figure>
+            </div>
+        </section>
+
+        <!--Part 0.3: Estimating Camera Pose -->
+        <section class="partA3">
+            <h2>Part 0.3: Estimating Camera Pose</h2>
+            <p>
+                Talk about estimating camera poses
+            
+            <p>
+                Below are 2 screenshots of my cloud of cameras in Viser showing the camera frustums' poses and images:
+            </p>
+            
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/part03_1.jpeg" alt="aaaa">
+                    <figcaption>Angle 1</figcaption>
+                </figure>
+                <figure>
+                    <img src="web_images/part03_2.jpeg" alt="aaaa">
+                    <figcaption>Angle 2</figcaption>
+                </figure>
+
+            </div>
+        </section>
+
+        <!-- Part 0.4: Undistorting images and creating a dataset -->
+        <section class="partA4">
+            <h2>Part 0.4: Undistorting images and creating a dataset</h2>
+            <p>
+                Talk about how I undistorted images and created a dataset, look at code
+            </p>
+        </section>
+
+        <section class="subsection">
+            <h1>Part 1: Fit a Neural Field to a 2D Image</h1>
+        </section>
+
+        <!-- Multilayer Perceptron (MLP) network -->
+        <section class="partB1">
+            <h2>Multilayer Perceptron (MLP) Network</h2>
+            <p>
+                Describe MLP implementation
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/mlp_structure_1.jpeg" alt="rose_harris">
+                    <figcaption>MLP for Fitting a 2D Image</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Dataloader -->
+        <section class="partB2">
+            <h2>Dataloader</h2>
+            <p>
+                Describe Dataloader Implementation
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b2_rose_patches.jpeg" alt="patches">
+                </figure>
+                <figure>
+                    <img src="photos/b2_rose_12.jpeg" alt="patches_on_photo">
+                    <figcaption>Rose Garden Descriptor Patches Locations</figcaption>
+                </figure>
+            </div>
+
+        </section>
+
+        <!-- Loss Function, Optimizer, and Metric -->
+        <section class="partB3">
+            <h2>Loss Function, Optimizer, and Metric</h2>
+            <p>
+                Describe Loss Function, Optimizer, and Metric implementation
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="photos/b3_rose.jpeg" alt="rose featute matching">
+                    <figcaption>Rose Garden Feature Matching</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Hyperparameter Tuning and Final Results-->
+        <section class="partB4">
+            <h2>Hyperparameter Tuning</h2>
+            <p>
+                Describe Hyperparameter Tuning implementation
+            </p>
+
+            <h3>Fox Training Progression</h3>
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/1_prog_3.jpeg" alt="Fox Training Progression">
+                    <figcaption>Fox Training Progression</figcaption>
+                </figure>
+                <figure>
+                    <img src="web_images/psnr_fox_curve.jpeg" alt="Fox Training Progression">
+                    <figcaption>FINISH</figcaption>
+                </figure>    
+            </div>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/fox.jpg" alt="Original Fox Image">
+                    <figcaption>Original Fox Image</figcaption>
+                </figure>   
+                <figure>
+                    <img src="web_images/1_final_reconstructions.jpeg" alt="Fox Training Progression">
+                    <figcaption>Results for 2 choices of max pos. encoding freq. and 2 choices of width</figcaption>
+                    <figcaption>FINISH</figcaption>
+                </figure>  
+            </div>
+
+            <h3>Flower Training Progression</h3>
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/1_flower_4.jpeg" alt="Flower Training Progression">
+                    <figcaption>Flower Training Progression</figcaption>
+                </figure>   
+                <figure>
+                    <img src="web_images/psnr_flower_curve.jpeg" alt="Flower Training Progression">
+                    <figcaption>FINISH</figcaption>
+                </figure>  
+            </div>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/flower.jpg" alt="Flower Image">
+                    <figcaption>Flower Original Image</figcaption>
+                </figure>   
+                <figure>
+                    <img src="web_images/1_flowers_final.jpeg" alt="Fox Training Progression">
+                    <figcaption>Results for 2 choices of max pos. encoding freq. and 2 choices of width</figcaption>
+                    <figcaption>FINISH</figcaption>
+                </figure>  
+            </div>
+        </section>
+
+        
+
+        <section class="subsection">
+            <h1>Part 2: Fit a Neural Radiance Field from Multi-view Images</h1>
+        </section>
+
+        <!-- Part 2.1: Create Rays from Cameras -->
+        <section class="partB1">
+            <h2>Part 2.1: Create Rays from Cameras</h2>
+            <p>
+                Describe Part 2.1: Create Rays from Cameras implementation
+            </p>
+
+        </section>
+
+        <!-- Part 2.2: Sampling -->
+        <section class="partB2">
+            <h2>Part 2.2: Sampling</h2>
+            <p>
+                Describe Part 2.2: Sampling Implementation
+            </p>
+
+        </section>
+
+        <!-- Part 2.3: Putting the Dataloading All Together -->
+        <section class="partB3">
+            <h2>Part 2.3: Putting the Dataloading All Together</h2>
+            <p>
+                Describe Part 2.3: Putting the Dataloading All Together implementation
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/2_3_one_camera.jpeg" alt="Rays sampled from 1 camera">
+                    <figcaption>Rays sampled from 1 camera</figcaption>
+                </figure>
+                <figure>
+                    <img src="web_images/2_3_all_cameras.jpeg" alt="Rays sampled from all cameras">
+                    <figcaption>Rays sampled from all cameras</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Part 2.4: Neural Radiance Field -->
+        <section class="partB4">
+            <h2>Part 2.4: Neural Radiance Field</h2>
+            <p>
+                Describe Part 2.4: Neural Radiance Field implementation
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/mlp_2.jpeg" alt="MLP 2">
+                    <figcaption>MLP for Fittings a Neural Radiance Field</figcaption>
+                </figure>   
+            </div>
+        </section>
+
+        <!-- Part 2.5: Volume Rendering -->
+        <section class="partB4">
+            <h2>Part 2.5: Volume Rendering</h2>
+            <p>
+                Describe Part 2.5: Volume Rendering implementation
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/lego_5000_snaps.jpeg" alt="rose manual">
+                    <figcaption>Lego Training Process Across Iterations</figcaption>
+                </figure>   
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/lego_5000_curves.jpeg" alt="rose manual">
+                    <figcaption>Training Loss and PSNR curve on Validation Set</figcaption>
+                </figure>   
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/lego_5000.gif" alt="rose manual">
+                    <figcaption>Final Render of the Lego Figure</figcaption>
+                </figure>   
+            </div>
+        </section>
+
+        <!-- Part 2.6: Training with my own data -->
+        <section class="partB4">
+            <h2>Part 2.6: Training with your own data</h2>
+            <p>
+                Describe Part 2.6: Training with your own data implementation
+            </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/IMG_4352.jpeg" alt="toy snaps">
+                    <figcaption>A reminder of what the toy looks like</figcaption>
+                </figure>   
+            </div>
+
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/moomin_5001_snaps.jpeg" alt="toy snaps">
+                    <figcaption>Toy Training Process Across Iterations</figcaption>
+                </figure>   
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/moomin_5001_curves.jpeg" alt="toy curves">
+                    <figcaption>Training Loss and PSNR curve on Validation Set</figcaption>
+                </figure>   
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="web_images/moomin_5000.gif" alt="toy gif">
+                    <figcaption>Final Render of the Toy</figcaption>
+                </figure>   
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>
