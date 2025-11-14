@@ -565,6 +565,12 @@
                 This issue could have been caused by a variety of factors, including the fact that real world, cheap camera on my phone and my own 
                 photography skills are far from ideal. The synthetic Lego data example provided was simulated in a way to be perfect for reconstruction, and my own dataset 
                 capturing probably involved a lot of camera and background disturbances and noise that prevented a perfect reconstruction.
+                I tried varying my near and far distance values more, but all combinations produced similar or worse results. I was hoping that varying those might shift the camera
+                plains and make them see the object that they were missing previously.
+                I also increased the number of iterations up from 5000 up to 10,000 in 1000 step increments, but this had an effect of a strange black blob appearing in the middle of my
+                visualization that I'm not sure where it came from. 
+                I also hoped that changing the number of samples per ray from 64 down to 32 or up to 128 would help with capturing more data points and thus increase the resolution, 
+                but all it really did is decrese (32) or increase (128) my runtime without an improvement on the final rendering.
             </p>
 
             <div class="gallery">
