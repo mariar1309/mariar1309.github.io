@@ -115,33 +115,35 @@
         <section class="partA2" id="part02">
             <h2>Part 1: Sampling Loops</h2>
             <p>
-                This section introduces the core concepts of diffusion models. A diffusion model works in two phases: the forward process 
-                gradually adds Gaussian noise to a clean image over T timesteps (T=1000 for DeepFloyd), while the reverse process learns 
+                In this section I wrote my own "sampling loops" that use pretrained DeepFloyd denoisers to produce high quality images. 
+                
+                A diffusion model works in two phases; first, the forward process 
+                gradually adds Gaussian noise to a clean image over T timesteps (T=1000 here), while the reverse process learns 
                 to denoise and recover the original image. By starting from pure noise and iteratively denoising, we can generate new images 
-                from scratch.
-            </p>
-            <p>
-                The forward process is defined by: <strong>x_t = √(ᾱ_t) · x_0 + √(1 - ᾱ_t) · ε</strong>, where x_0 is the clean image, 
-                x_t is the noisy image at timestep t, and ε is Gaussian noise. The noise schedule coefficients ᾱ_t control how much noise 
-                is added at each step.
-            </p>
-            <p>
-                In the following sections, I implement these sampling loops from scratch and explore their various applications.
+                from scratch using what we learned from traiing. 
             </p>
         </section>
 
         <section class="partA3" id="part11">
             <h2>Part 1.1: Implementing the Forward Process</h2>
             <p>
-                The forward process is the foundation of diffusion models. I implemented a function that takes a clean image and adds 
-                a specific amount of Gaussian noise based on the timestep t. The formula combines the scaled original image with scaled 
+                The forward process is defined by: <strong>x_t = √(ᾱ_t) · x_0 + √(1 - ᾱ_t) · ε</strong>, where x_0 is the clean image, 
+                x_t is the noisy image at timestep t, and ε is Gaussian noise. The noise schedule coefficients ᾱ_t control how much noise 
+                is added at each step.
+            </p>
+            <p>
+                I implemented a function <code>noisy_im = forward(im, t)</code> that takes a clean image <code>im</code> and adds 
+                a specific amount of Gaussian noise based on the timestep <code>t</code>. 
+                At every timestep t, we get the corresponding noise schedule coefficients ᾱ_t from pre-defined (by people who trained DeepFloyd)
+                scheduler parameters <code>alphas_cumprod</code>, sample random noise epsion from N(0, 1) with the same shape as im, and apply the forward
+                process formula.
+                The formula combines the scaled original image with scaled 
                 random noise: <strong>x_t = √(ᾱ_t) · x_0 + √(1 - ᾱ_t) · ε</strong>.
             </p>
             <p>
-                Using the alphas_cumprod schedule (where ᾱ_t ≈ 1 for small t and ᾱ_t ≈ 0 for large t), I applied this process to 
-                the Campanile test image at three different noise levels: t=250 (slight noise), t=500 (moderate noise), and t=750 
-                (heavy noise). As expected, the image becomes progressively more corrupted as t increases, eventually resembling pure 
-                Gaussian noise at high timestep values.
+                I applied this process to 
+                the Campanile test image at three different noise levels: t=250 (little noise), t=500 (moderate noise), and t=750 
+                (heavy noise). As expected, the image becomes progressively more corrupted as t increases.
             </p>
 
             <div class="gallery">
@@ -155,19 +157,16 @@
         <section class="partA4" id="part12">
             <h2>Part 1.2: Classical Denoising</h2>
             <p>
-                To establish a baseline, I attempted to denoise the noisy Campanile images using classical Gaussian blur filtering. 
-                This method simply applies spatial smoothing to reduce noise, without any understanding of the underlying image structure.
-            </p>
-            <p>
+                First I tried to denoise my images using classical methods, like here I take my noisy images for steps [250, 500, 750] and 
+                use <b>Gaussian blur filtering</b> to try to remove the noise.
+                This method simply applies spatial smoothing to reduce noise, without any understanding of the underlying image structure, 
+                so the results are not very good at all!
                 I experimented with different kernel sizes (3×3 for t=250, 5×5 for t=500, 7×7 for t=750) to find the best denoising 
-                for each noise level. As shown below, Gaussian blur performs poorly – it removes noise but also destroys fine details 
-                and creates a blurry result. For heavily noised images (t=750), the method essentially fails to recover any meaningful 
-                structure. This demonstrates why we need more sophisticated learned approaches like diffusion models.
+                for each noise level, but even that adjustement did not save me from a blurry and messy result.
             </p>
             <div class="gallery">
                 <figure>
                     <img src="web_images/part_1_2.jpeg" alt="Classical denoising comparison">
-                    <figcaption>Top: Noisy images at t=250, 500, 750. Bottom: Gaussian blur denoised versions</figcaption>
                 </figure>
             </div>
         </section>
@@ -176,21 +175,19 @@
             <h2>Part 1.3: One-Step Denoising</h2>
             <p>
                 Now I used the pretrained DeepFloyd UNet to denoise images in a single step. The UNet was trained on millions of 
-                noisy/clean image pairs and learned to predict the noise component in a noisy image. Given x_t and timestep t, 
-                the UNet outputs an estimate of the noise ε, which I can use to recover the clean image: 
+                noisy/clean image pairs and learned to predict the noise component in a noisy image. So here, given a noisy image x_t and timestep t, 
+                the UNet outputs an estimate of the noise ε, which I use to recover the clean image: 
                 <strong>x_0 = (x_t - √(1 - ᾱ_t) · ε) / √(ᾱ_t)</strong>.
             </p>
             <p>
-                The UNet is conditioned on text prompts (I used "a high quality photo") and outputs 6 channels – the first 3 are 
-                the noise estimate, and the last 3 are variance estimates. Compared to Gaussian blur, one-step denoising produces 
-                dramatically better results, successfully recovering recognizable structure even from heavily noised images. However, 
-                quality degrades at higher noise levels (t=750) since estimating the clean image from pure noise in one step is 
-                extremely difficult.
+                The UNet is conditioned on text prompts (used "a high quality photo" for now). I think that compared to Gaussian blur, one-step denoising produces 
+                much cleaner results, successfully recovering recognizable Campanile structure even from the most noisy stages. 
+                However, there's a huge trade-off in quality of the image at higher values of t because removing that much noise in one step also removes 
+                too many fine details from the underlying original image of the Campanile.
             </p>
             <div class="gallery">
                 <figure>
                     <img src="web_images/part_1_3.jpeg" alt="One-step denoising results">
-                    <figcaption>Top: Noisy images. Bottom: One-step denoised results at t=250, 500, 750</figcaption>
                 </figure>
             </div>
         </section>
@@ -198,19 +195,22 @@
         <section class="partA6" id="part14">
             <h2>Part 1.4: Iterative Denoising</h2>
             <p>
-                To improve quality, I implemented iterative denoising, which gradually removes noise over multiple steps. Instead of 
-                running all 1000 timesteps, I used a strided schedule (990, 960, 930, ..., 30, 0) with steps of 30 for efficiency.
+                Instead of denoising in one-step, I now tried to denoise iteratively (the way diffusion models were designed to do).
+                Iterative denoising gradually removes noise over multiple steps. Instead of running all 1000 timesteps (oops, too expensive!), 
+                I used a strided schedule (990, 960, 930, ..., 30, 0) with steps of 30 for efficiency.
             </p>
             <p>
-                At each step, I: (1) predict x_0 using the UNet, (2) compute the next slightly-less-noisy image x_t' using the DDPM 
-                formula that interpolates between the predicted clean image and directional noise, and (3) add a small amount of 
-                predicted variance. The key formula is: 
-                <strong>x_t' = √(ᾱ_t') · β_t / (1 - ᾱ_t) · x_0 + √(α_t) · (1 - ᾱ_t') / (1 - ᾱ_t) · x_t + variance</strong>.
+                Here I implement the function <code>iterative_denoise(im_noisy, i_start, prompt_embeds, timesteps)</code>.
+                At each step, the function (1) predicts x_0 using the UNet, (2) computes the next slightly-less-noisy image x_t' using the DDPM 
+                formula that interpolates between the predicted clean image and directional noise, and (3) adds a small amount of 
+                random noise (via function <code>add_variance</code>) to keep the model from establishing a strong bias during training. 
+                The formula I followed here is <strong>x_t' = √(ᾱ_t') · β_t / (1 - ᾱ_t) · x_0 + √(α_t) · (1 - ᾱ_t') / (1 - ᾱ_t) · x_t + v_\(\sigma \)</strong>.
             </p>
             <p>
-                Starting from i_start=10 (t=690), I show the denoising progression every 5 iterations. The image gradually becomes 
-                clearer, demonstrating how iterative refinement produces much better results than one-step denoising. The final comparison 
-                shows iterative denoising produces the sharpest, most detailed reconstruction compared to one-step denoising and Gaussian blur.
+                Below I show the denoising progression at the same timesteps as specified in the project spec. As we move back from later (t=690) to 
+                earlier timesteps (t=90), the image gradually becomes clearer, demonstrating how iterative refinement produces much 
+                better results than one-step denoising. The final comparison 
+                shows iterative denoising produces most detailed reconstruction compared to one-step denoising and the Gaussian blur.
             </p>
             <div class="gallery">
                 <figure>
@@ -229,13 +229,13 @@
         <section class="partA7" id="part15">
             <h2>Part 1.5: Diffusion Model Sampling</h2>
             <p>
-                With iterative denoising working, I can now generate images from scratch! By starting with pure random noise (x_T) 
-                and running iterative denoising from i_start=0, the model "hallucinates" entirely new images that match the prompt.
+                Now that we have iterative denoising working, I can now generate images from scratch. I do this by generating pure random noise (x_T) 
+                and running iterative denoising from i_start=0, which leads to the model hallucinating entirely new image that match the prompt (still "a high quality photo" here).
             </p>
             <p>
-                I generated 5 samples using the prompt "a high quality photo". The results are coherent but somewhat generic and 
-                lack fine details. This is expected without Classifier-Free Guidance – the model produces diverse samples but they're 
-                not strongly tied to the prompt. The quality will improve significantly in the next section with CFG.
+                Here are 5 sample images I got with that prompt. The model produces diverse samples with familiar-looking scenes and characters, 
+                but there is a clear lack of quality and details. Now we need to figure out a way to create a stronger link between the text prompt and the 
+                iamge generation process in order to produce better results. 
             </p>
             <div class="gallery">
                 <figure>
@@ -248,19 +248,26 @@
         <section class="partA8" id="part16">
             <h2>Part 1.6: Classifier-Free Guidance (CFG)</h2>
             <p>
-                Classifier-Free Guidance dramatically improves image quality by amplifying the influence of the text prompt. The technique 
-                computes both conditional (ε_cond with prompt) and unconditional (ε_uncond with empty prompt "") noise estimates, then 
-                extrapolates away from the unconditional estimate: <strong>ε = ε_uncond + scale · (ε_cond - ε_uncond)</strong>.
+                In order to improve image quality (at the expense of image diversity), I implemented Classifier-Free Guidance to amplify the influence of the text prompt. 
+                This approach computes both conditional (ε_cond with prompt) and unconditional (ε_uncond with empty prompt "") noise estimates, and then 
+                extrapolates away from the unconditional estimate for our new noise estimate: <strong>ε = ε_uncond + γ · (ε_cond - ε_uncond)</strong>.
             </p>
             <p>
-                With scale=7, the model produces much sharper, more coherent images that strongly adhere to the prompt. The tradeoff is 
-                reduced diversity – higher CFG values sacrifice variety for quality. Comparing these 5 CFG samples to the non-CFG samples 
-                from Part 1.5, the improvement is striking: images are more detailed, better composed, and look more "real".
+                The γ in this formual is the scale that controls the sterngth of CFG (for γ = 0 we get an unconditional noise estimate, and for γ = 1
+                we get the conditional noise estimate). With γ=7, the model produces much sharper, more coherent images that strongly adhere to the prompt. The tradeoff is 
+                reduced diversity, because higher CFG values sacrifice variety for quality. 
+            </p>
+            <p>
+                In <code>iterative_denoise_cfg</code> function, for each denoising step, I pass the current noisy image through the UNet twice. Once with <code>prompt_embeds</code> to get
+                the conditional noise estimate ε_cond, and once with <code>uncond_prompt_embeds</code> (empty string "") to get the 
+                unconditional noise estimate ε_uncond. I then use the formula above to compute the guided noise estimate, where with our scale of 7, 
+                this extrapolates away from the unconditional prediction in the direction of the conditional prediction,  amplifying the prompt's influence. 
+                The resulting images are much more detailed and produce more realistic looking people, places, and objects.
             </p>
             <div class="gallery">
                 <figure>
                     <img src="web_images/part_1_6_b.jpeg" alt="CFG samples">
-                    <figcaption>5 images with CFG (scale=7) – much higher quality than without CFG</figcaption>
+                    <figcaption>5 images with CFG (scale=7)</figcaption>
                 </figure>
             </div>
         </section>
@@ -268,32 +275,29 @@
         <section class="partA9" id="part17">
             <h2>Part 1.7: Image-to-Image Translation</h2>
             <p>
-                Using the SDEdit algorithm, I can edit existing images by adding noise and then denoising with CFG. The amount of noise 
-                (controlled by i_start) determines how much the image changes: low i_start (little noise) preserves the original structure, 
-                while high i_start (more noise) allows more creative freedom.
-            </p>
-            <p>
-                I tested this with i_start values [1, 3, 5, 7, 10, 20] on three images: the Campanile, a horse photo, and a photo of my 
-                friend Basil. With i_start=1, the edited image is nearly identical to the original. As i_start increases, the model makes 
-                more significant edits while maintaining the overall composition. At i_start=20, the images are quite different but still 
-                recognizable as the same subject. This demonstrates how diffusion models can "project" images onto the manifold of natural images.
+                Using the SDEdit algorithm, I edit existing images by controlling how much noise is added before denoising.
+                 For each i_start value in [1, 3, 5, 7, 10, 20], I use my <code>forward</code> function to add noise at timestep <code>t = strided_timesteps[i_start]</code>, 
+                 then denoise with <code>iterative_denoise_cfg</code> using scale=7. Lower i_start values add minimal noise (preserving the original structure), 
+                 while higher values add more noise (allowing greater creative freedom). 
+                
+                I tested this on the original image of the Campanile, as well as two of my own photos of a toy horse and my friend Basil.
             </p>
             <div class="gallery">
                 <figure>
                     <img src="web_images/part_1_7_a.jpeg" alt="Campanile SDEdit">
-                    <figcaption>Campanile edits at noise levels 1, 3, 5, 7, 10, 20, plus original</figcaption>
+                    <figcaption>Campanile edits at noise levels 1, 3, 5, 7, 10, 20 (and original)</figcaption>
                 </figure>
             </div>
             <div class="gallery">
                 <figure>
                     <img src="web_images/part_1_7_b.jpeg" alt="Horse SDEdit">
-                    <figcaption>Horse image edits at different noise levels with "a high quality photo"</figcaption>
+                    <figcaption>Toy horse edits at noise levels 1, 3, 5, 7, 10, 20 (and original)</figcaption>
                 </figure>
             </div>
             <div class="gallery">
                 <figure>
                     <img src="web_images/1_7_b.jpeg" alt="Basil SDEdit">
-                    <figcaption>Basil image edits showing gradual transformation</figcaption>
+                    <figcaption>A photo of my friend Basil edits at noise levels 1, 3, 5, 7, 10, 20 (and original)</figcaption>
                 </figure>
             </div>
         </section>
@@ -301,15 +305,10 @@
         <section class="partA10" id="part171">
             <h2>Part 1.7.1: Editing Hand-Drawn and Web Images</h2>
             <p>
-                This technique works particularly well on non-realistic inputs like sketches and drawings. I tested it on three images: 
-                a web sketch of Berkeley, and my hand-drawn sheep and tomato. The diffusion model "projects" these simple drawings onto 
-                the natural image manifold, adding realistic textures, lighting, and details while preserving the original composition.
-            </p>
-            <p>
-                The results are remarkable – simple line drawings are transformed into photorealistic images. The Berkeley sketch becomes 
-                a convincing architectural photo, the sheep sketch gains fluffy wool texture and realistic shading, and the tomato drawing 
-                acquires the glossy appearance of a real tomato. This demonstrates the model's ability to understand and extrapolate from 
-                minimal visual information.
+                The SDEdit technique works exceptionally well on non-realistic inputs. 
+                I applied the same SDEdit pipeline from Part 1.7 to three sketches: a sketch of Berkeley I found on the web 
+                 and my hand-drawn sheep and tomato. 
+                 The diffusion model projects these simple line drawings onto the natural image manifold, adding realistic textures, lighting, and details while preserving the original sketch composition.
             </p>
 
             <div class="gallery">
@@ -318,7 +317,7 @@
                 </figure>
                 <figure>
                     <img src="web_images/sheep_sketch.jpeg" alt="Sheep sketch">
-                    <figcaption>Original sketches and drawings</figcaption>
+                    <figcaption>Original drawings</figcaption>
                 </figure>
                 <figure>
                     <img src="web_images/tomato_sketch.jpeg" alt="Tomato sketch">
@@ -334,13 +333,13 @@
             <div class="gallery">
                 <figure>
                     <img src="web_images/sheep_process.jpeg" alt="Sheep processed">
-                    <figcaption>My sheep drawing becoming photorealistic</figcaption>
+                    <figcaption>Sheep sketch transformed at different noise levels</figcaption>
                 </figure>
             </div>
             <div class="gallery">
                 <figure>
                     <img src="web_images/tomato_progress.jpeg" alt="Tomato processed">
-                    <figcaption>My tomato drawing gaining realistic texture and lighting</figcaption>
+                    <figcaption>Tomato sketch transformed at different noise levels</figcaption>
                 </figure>
             </div>
         </section>
@@ -348,15 +347,17 @@
         <section class="partA11" id="part172">
             <h2>Part 1.7.2: Inpainting</h2>
             <p>
-                Following the RePaint paper, I implemented inpainting to fill masked regions with new content. The algorithm runs the 
-                normal denoising loop, but at each step, replaces the unmasked regions with the properly-noised original image: 
-                <strong>x_t ← mask · x_t + (1 - mask) · forward(x_orig, t)</strong>.
+                I used the same procedure to implement inpainting, following the RePaint paper.
+                 I implemented inpainting to fill masked regions with new content. The algorithm runs the 
+                normal denoising loop, but at each step, replaces the unmasked regions with the properly-noised original image.
             </p>
             <p>
-                This forces the model to preserve the original image outside the mask while generating plausible content inside the mask 
-                that blends naturally with its surroundings. I demonstrate this by inpainting the top of the Campanile (making the model 
-                hallucinate a new tower top), removing parts of the horse image, and editing my friend Basil's photo. The model generates 
-                convincing fills that maintain consistency with the surrounding image context.
+                Following the RePaint paper, my <code>inpaint</code> function modifies the standard denoising loop by
+                creating a binary mask where 1 indicates regions to regenerate and 0 indicates regions to preserve. 
+                At each denoising step, after computing <code>pred_prev_image</code> with CFG, I replace the unmasked regions using <strong>pred_prev_image = mask · pred_prev_image + (1 - mask) · forward(original_image, prev_t)</strong>. 
+                The resulting image preserves the original photo elements from outside the mask while generating new creative content inside it.
+                Below is an example of inpainted Campanile (its clock got replaced with lighthouse top).
+                I also applied it to my photos of a toy horse (which now has a rider) and my friend (who got a pink hat).
             </p>
 
             <div class="gallery">
@@ -383,15 +384,13 @@
             <h2>Part 1.7.3: Text-Conditional Image-to-Image Translation</h2>
             <p>
                 Building on SDEdit, I now guide the image projection with specific text prompts instead of the generic "a high quality photo". 
-                This provides semantic control over the editing process – the model tries to make the image look like the text description 
-                while preserving its structure.
+                This provides semantic control over the editing process, and I can make the model generate a new image that follows the prompt while
+                preserving the original image composition.
             </p>
             <p>
-                I experimented with prompts like "a marble statue", "a rocket ship", "sourdough bread dough rising", and "a colorful garden 
-                with flowers". At low noise levels (i_start=1-3), the transformations are subtle. At higher noise levels (i_start=10-20), 
-                the subjects take on clear characteristics of the prompt – the Campanile becomes marble-textured, the horse looks bread-like, 
-                and Basil's photo gains floral colors and patterns. This demonstrates impressive prompt-guided style transfer while maintaining 
-                compositional structure.
+                Below are my experiments with prompts like "a marble statue", "a rocket ship", "sourdough bread dough rising", and "a colorful garden 
+                with flowers". At low noise levels (i_start=1), the transformations are subtle, but at higher noise levels (i_start=20), 
+                the subjects take on clear characteristics of the prompt.
             </p>
 
             <div class="gallery">
@@ -423,17 +422,15 @@
         <section class="partA13" id="part18">
             <h2>Part 1.8: Visual Anagrams</h2>
             <p>
-                Visual anagrams are optical illusions where an image shows one thing normally but reveals something different when flipped 
-                upside down. I implemented this by computing noise estimates for both orientations and averaging them: 
-                <strong>ε = (ε_1 + flip(ε_2)) / 2</strong>, where ε_1 comes from denoising the normal image with prompt p_1, and ε_2 comes 
-                from denoising the flipped image with prompt p_2.
+                Visual anagrams are optical illusions where an image appears as one thing normally but reveals a different picture when flipped upside down. 
+                I implemented this in my <code>visual_anagrams</code> function by running the UNet four times per denoising step: 
+                twice for the normal orientation (conditional and unconditional with prompt_embeds_1) and twice for the flipped orientation 
+                (conditional and unconditional with prompt_embeds_2). I flip the image upside down using <code>torch.flip(image, dims=[2])</code>, 
+                compute CFG noise estimates for both orientations, flip the second noise estimate back, and average them. 
+                This averaged noise is then used in the standard DDPM denoising formula I used before. 
             </p>
             <p>
-                I created three visual anagrams: (1) Count Dracula / Gothic Cathedral – the flowing cape transforms into cathedral spires 
-                when flipped, (2) Old Man / Natural Landscape – facial features become landscape elements, and (3) Grand Piano / Staircase – 
-                the piano keys and body structure naturally invert to form ascending stairs. These illusions required multiple attempts to 
-                generate good results, as the two prompts must have compatible shapes. The results are striking examples of how diffusion 
-                models can satisfy two contradictory visual interpretations simultaneously.
+                Below are some examples of the anagrams I created (titles are the conditioning prompts I used):
             </p>
 
             <div class="gallery">
@@ -455,7 +452,7 @@
                 </figure>
                 <figure>
                     <img src="web_images/1_8_stairs_b.jpg" alt="Stairs view" style="max-width: 500px; height: auto;">
-                    <figcaption>A staircase going up (same image flipped)</figcaption>
+                    <figcaption>A staircase going up</figcaption>
                 </figure>
             </div>
         </section>
@@ -463,42 +460,37 @@
         <section class="partA14" id="part19">
             <h2>Part 1.9: Hybrid Images</h2>
             <p>
-                Following the Factorized Diffusion paper, I created hybrid images that show different content when viewed up close versus 
-                far away. The technique combines low frequencies from one noise estimate with high frequencies from another: 
-                <strong>ε = f_lowpass(ε_1) + f_highpass(ε_2)</strong>, where I used Gaussian blur (kernel=33, sigma=2) for filtering.
-            </p>
-            <p>
-                I created four hybrid images: (1) Skull / Waterfall – up close you see skull details, from far away it looks like a waterfall, 
-                (2) Sheet Music / Birds on Wire – music notes up close, bird silhouettes from afar, (3) Artist's Palette / Colorful Garden – 
-                paint blobs versus flowers, and (4) Swirled Frosting / Rose – frosting texture versus rose shape. These work because the prompt 
-                pairs share similar structures at different scales: linear patterns (notes/birds), color distributions (palette/garden), and 
-                spiral patterns (frosting/rose). The results demonstrate how our visual system processes different spatial frequencies at 
-                different viewing distances.
+                We can also use this diffusion model to create hybrid images that show different content at different viewing distances. 
+                My <code>make_hybrids</code> function computes CFG noise estimates for two different prompts, then separates high and low frequencies.
+                I extract low frequencies from the first noise estimate using <code>TF.gaussian_blur</code>, and compute high frequencies from the second estimate using 
+                <strong>high_freqs = cfg_noise_est_2 - gaussian_blur(cfg_noise_est_2)</strong>. 
+                The combined noise estimate <strong>ε</strong> is then used for denoising. 
+                Here are some hybrids I got:
             </p>
 
             <div class="gallery">
                 <figure>
                     <img src="web_images/1_9_skull.jpg" alt="Skull hybrid" style="max-width: 400px; height: auto;">
-                    <figcaption>Hybrid: Skull (close) / Waterfall (far)</figcaption>
+                    <figcaption>Hybrid of Skull and Waterfall </figcaption>
                 </figure>
                 <figure>
                     <img src="web_images/1_9_birds_c.jpeg" alt="Birds hybrid" style="max-width: 400px; height: auto;">
-                    <figcaption>Hybrid: Sheet music (close) / Birds on wire (far)</figcaption>
+                    <figcaption>Hybrid of sheet music and  birds on a wire</figcaption>
                 </figure>
                 <figure>
                     <img src="web_images/1_9_palette.jpg" alt="Palette hybrid" style="max-width: 400px; height: auto;">
-                    <figcaption>Hybrid: Colorful garden (close) / Artist's palette (far)</figcaption>
+                    <figcaption>Hybrid of a colorful garden and an artist's palette</figcaption>
                 </figure>
                 <figure>
                     <img src="web_images/1_9_rose.jpeg" alt="Rose hybrid" style="max-width: 400px; height: auto;">
-                    <figcaption>Hybrid: Swirled frosting (close) / Rose flower (far)</figcaption>
+                    <figcaption>Hybrid of a swirled frosting and a rose flower</figcaption>
                 </figure>
             </div>
         </section>
 
         <section class="subsection" id="partb">
             <h1>Part B: Flow Matching From Scratch</h1>
-            <p>Come back here in a week – Part B implementation in progress!</p>
+            <p>Working on this rn, come back in a week.</p>
         </section>
 
     </div>
