@@ -1,236 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Portfolio</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #ffffff;
-            color: #1a1a1a;
-        }
-        
-        header {
-            background: #1a5cff;
-            color: white;
-            padding: 3rem 1.5rem;
-            text-align: center;
-        }
-        
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        header p {
-            font-size: 1.1rem;
-            font-weight: 300;
-            color: #6bc1ff;
-        }
-        
-        nav {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            background: #6bc1ff;
-            padding: 1rem;
-        }
-        
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-        }
-        
-        main {
-            padding: 3rem 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .card {
-            background: #1a5cff;
-            color: white;
-            padding: 2rem;
-            border-radius: 0;
-            border: none;
-            box-shadow: 0 4px 12px rgba(26, 92, 255, 0.2);
-        }
-        
-        .card h2 {
-            margin-top: 0;
-            margin-bottom: 1rem;
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-        
-        .card p {
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-        
-        .card a {
-            color: #6bc1ff;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 1rem;
-            border: 2px solid #6bc1ff;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            display: inline-block;
-        }
-        
-        section {
-            padding: 3rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        #about {
-            background: #6bc1ff;
-            color: white;
-        }
-        
-        #about h2 {
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        #about p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-        
-        #contact {
-            background: #ffffff;
-            color: #1a1a1a;
-        }
-        
-        #contact h2 {
-            color: #1a5cff;
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        #contact p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-        
-        #contact a {
-            color: #6bc1ff;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 2rem;
-            background: #1a1a1a;
-            color: white;
-            margin-top: 2rem;
-        }
-        
-        footer p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-        
-        @media (max-width: 768px) {
-            header {
-                padding: 2rem 1rem;
-            }
-            
-            header h1 {
-                font-size: 2rem;
-            }
-            
-            nav {
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-            
-            main {
-                padding: 2rem 1rem;
-                grid-template-columns: 1fr;
-            }
-            
-            section {
-                padding: 2rem 1rem;
-            }
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS 180 (Computer Vision and Computational Photography) Portfolio</title>
+    <h3>UC Berkeley - Maria Rufova</h3>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <header>
-        <h1>My CS180 Portfolio</h1>
-        <p>UC Berkeley Fall 2025 - Maria Rufova</p>
-    </header>
-
-    <nav>
-        <a href="./">Home</a>
-        <a href="#projects">Projects</a>
-        <a href="#contact">Contact</a>
-    </nav>
-
-    <main id="projects">
-        <div class="card">
-            <h2>Project 0</h2>
-            <p>Becoming friends with your camera</p>
-            <a href="./proj0/">View Project</a>
+    <aside class="sidebar">
+        <div class="sidebar-content">
+            <h3>Navigation</h3>
+            <ul>
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
         </div>
+    </aside>
 
-        <div class="card">
-            <h2>Project 1</h2>
-            <p>Images of the Russian Empire: Colorizing the Prokudin-Gorskii photo collection</p>
-            <a href="./proj1/">View Project</a>
-        </div> 
+    <div class="main-wrapper">
+        <header class="header" id="home">
+            <h1>My CS180 Portfolio</h1>
+            <h2>UC Berkeley Fall 2025 — Maria Rufova</h2>
+        </header>
 
-        <div class="card">
-            <h2>Project 2</h2>
-            <p>Fun with Filters and Frequencies!</p>
-            <a href="./proj2/">View Project</a>
-        </div> 
+        <section id="projects">
+            <h2>Course Projects</h2>
+            <div class="project-grid">
+                <a class="card" href="./proj0/">
+                    <h3>Project 0</h3>
+                    <p>Becoming friends with your camera</p>
+                </a>
+                <a class="card" href="./proj1/">
+                    <h3>Project 1</h3>
+                    <p>Prokudin-Gorskii Colorization</p>
+                </a>
+                <a class="card" href="./proj2/">
+                    <h3>Project 2</h3>
+                    <p>Fun with Filters and Frequencies</p>
+                </a>
+                <a class="card" href="./proj3/">
+                    <h3>Project 3</h3>
+                    <p>Auto-Stitching & Mosaics</p>
+                </a>
+                <a class="card" href="./proj4/">
+                    <h3>Project 4</h3>
+                    <p>Neural Radiance Fields (NeRF)</p>
+                </a>
+                <a class="card" href="./proj5/">
+                    <h3>Project 5</h3>
+                    <p>Fun With Diffusion Models</p>
+                </a>
+            </div>
+        </section>
 
-        <div class="card">
-            <h2>Project 3</h2>
-            <p>(Auto)stitching and Photo Mosaics</p>
-            <a href="./proj3/">View Project</a>
-        </div> 
-
-
-        <div class="card">
-            <h2>Project 4</h2>
-            <p>Neural Radiance Field! (NeRF)</p>
-            <a href="./proj4/">View Project</a>
-        </div> 
-
-        <div class="card">
-            <h2>Project 5</h2>
-            <p>Fun With Diffusion Models!</p>
-            <a href="./proj5/">View Project</a>
-        </div> 
-    </main>
-
-    <section id="contact">
-        <h2>Contact</h2>
-        <p>You can reach me at <a href="mailto:mariarufova@berkeley.edu">mariarufova@berkeley.edu</a>.</p>
-    </section>
-
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>You can reach me at <a href="mailto:mariarufova@berkeley.edu">mariarufova@berkeley.edu</a>.</p>
+        </section>
+    </div>
 </body>
-</html>     
+</html>
