@@ -14,25 +14,43 @@
             <h3>Contents</h3>
             <ul>
                 <li><a href="#introduction">Introduction</a></li>
-                <li><a href="#part0">Part A: Diffusion Models</a>
+                <li><a href="#parta">Part A: The Power of Diffusion Models!</a>
                     <ul>
-                        <li><a href="#part01">Part 0: Setup</a></li>
-                        <li><a href="#part02">Part 1: Sampling Loops</a></li>
-                        <li><a href="#part11">Part 1.1: Forward Process</a></li>
-                        <li><a href="#part12">Part 1.2: Classical Denoising</a></li>
-                        <li><a href="#part13">Part 1.3: One-Step Denoising</a></li>
-                        <li><a href="#part14">Part 1.4: Iterative Denoising</a></li>
-                        <li><a href="#part15">Part 1.5: Diffusion Sampling</a></li>
-                        <li><a href="#part16">Part 1.6: CFG</a></li>
-                        <li><a href="#part17">Part 1.7: Image-to-Image</a></li>
-                        <li><a href="#part171">Part 1.7.1: Hand-Drawn Images</a></li>
-                        <li><a href="#part172">Part 1.7.2: Inpainting</a></li>
-                        <li><a href="#part173">Part 1.7.3: Text-Conditional</a></li>
-                        <li><a href="#part18">Part 1.8: Visual Anagrams</a></li>
-                        <li><a href="#part19">Part 1.9: Hybrid Images</a></li>
+                        <li><a href="#parta0">Part 0: Setup</a></li>
+                        <li><a href="#parta1">Part 1: Sampling Loops</a></li>
+                        <li><a href="#parta11">Part 1.1: Forward Process</a></li>
+                        <li><a href="#parta12">Part 1.2: Classical Denoising</a></li>
+                        <li><a href="#parta13">Part 1.3: One-Step Denoising</a></li>
+                        <li><a href="#parta14">Part 1.4: Iterative Denoising</a></li>
+                        <li><a href="#parta15">Part 1.5: Diffusion Sampling</a></li>
+                        <li><a href="#parta16">Part 1.6: CFG</a></li>
+                        <li><a href="#parta17">Part 1.7: Image-to-Image</a></li>
+                        <li><a href="#parta171">Part 1.7.1: Hand-Drawn Images</a></li>
+                        <li><a href="#parta172">Part 1.7.2: Inpainting</a></li>
+                        <li><a href="#parta173">Part 1.7.3: Text-Conditional</a></li>
+                        <li><a href="#parta18">Part 1.8: Visual Anagrams</a></li>
+                        <li><a href="#parta19">Part 1.9: Hybrid Images</a></li>
                     </ul>
                 </li>
-                <li><a href="#partb">Part B: Flow Matching</a></li>
+                <li><a href="#partb">Part B: Flow Matching From Scratch!</a>
+                    <ul>
+                        <li><a href="#partb1">Part 1: Training a Single-Step Denoising UNet</a></li>
+                        <li><a href="#partb11">Part 1.1: Implementing the UNet</a></li>
+                        <li><a href="#partb12">Part 1.2: Using the UNet to Train a Denoiser</a></li>
+                            <ul>
+                                <li><a href="b121">Part 1.2.1: Training</a></li>
+                                <li><a href="b122">Part 1.2.2: Out-of-Distribution Testing</a></li>
+                                <li><a href="b123">Part 1.2.3: Denoising Pure Noise</a></li>
+                            </ul>
+                        <li><a href="#partb2">Part 2: Training a Flow Matching Model</a></li>
+                        <li><a href="#partb21">Part 2.1: Adding Time Conditioning to UNet</a></li>
+                        <li><a href="#partb22">Part 2.2: Training the UNet</a></li>
+                        <li><a href="#partb23">Part 2.3: Sampling from the UNet</a></li>
+                        <li><a href="#partb24">Part 2.4: Adding Class-Conditioning to UNet </a></li>
+                        <li><a href="#partb25">Part 2.5: Training the Unet</a></li>
+                        <li><a href="#partb26">Part 2.6: Sampling form the UNet</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </nav>
@@ -60,11 +78,11 @@
         </section>
 
         <!-- Part 0 -->
-        <section class="subsection" id="part0">
+        <section class="subsection" id="parta">
             <h1>Part A: The Power of Diffusion Models</h1>
         </section>
 
-        <section class="partA1" id="part01">
+        <section class="partA1" id="parta0">
             <h2>Part 0: Setup</h2>
             <p>
                 Throughout part A I used the DeepFloyd IF diffusion model, a two-stage text-to-image model that produces 64×64 images. 
@@ -112,7 +130,7 @@
             </div>
         </section>
 
-        <section class="partA2" id="part02">
+        <section class="partA2" id="parta1">
             <h2>Part 1: Sampling Loops</h2>
             <p>
                 In this section I wrote my own "sampling loops" that use pretrained DeepFloyd denoisers to produce high quality images. 
@@ -124,7 +142,7 @@
             </p>
         </section>
 
-        <section class="partA3" id="part11">
+        <section class="partA3" id="parta11">
             <h2>Part 1.1: Implementing the Forward Process</h2>
             <p>
                 The forward process is defined by: <strong>x_t = √(ᾱ_t) · x_0 + √(1 - ᾱ_t) · ε</strong>, where x_0 is the clean image, 
@@ -154,7 +172,7 @@
             </div>
         </section>
 
-        <section class="partA4" id="part12">
+        <section class="partA4" id="parta12">
             <h2>Part 1.2: Classical Denoising</h2>
             <p>
                 First I tried to denoise my images using classical methods, like here I take my noisy images for steps [250, 500, 750] and 
@@ -171,7 +189,7 @@
             </div>
         </section>
 
-        <section class="partA5" id="part13">
+        <section class="partA5" id="parta13">
             <h2>Part 1.3: One-Step Denoising</h2>
             <p>
                 Now I used the pretrained DeepFloyd UNet to denoise images in a single step. The UNet was trained on millions of 
@@ -192,7 +210,7 @@
             </div>
         </section>
 
-        <section class="partA6" id="part14">
+        <section class="partA6" id="parta14">
             <h2>Part 1.4: Iterative Denoising</h2>
             <p>
                 Instead of denoising in one-step, I now tried to denoise iteratively (the way diffusion models were designed to do).
@@ -226,7 +244,7 @@
             </div>
         </section>
 
-        <section class="partA7" id="part15">
+        <section class="partA7" id="parta15">
             <h2>Part 1.5: Diffusion Model Sampling</h2>
             <p>
                 Now that we have iterative denoising working, I can now generate images from scratch. I do this by generating pure random noise (x_T) 
@@ -245,7 +263,7 @@
             </div>
         </section>
 
-        <section class="partA8" id="part16">
+        <section class="partA8" id="parta16">
             <h2>Part 1.6: Classifier-Free Guidance (CFG)</h2>
             <p>
                 In order to improve image quality (at the expense of image diversity), I implemented Classifier-Free Guidance to amplify the influence of the text prompt. 
@@ -272,7 +290,7 @@
             </div>
         </section>
 
-        <section class="partA9" id="part17">
+        <section class="partA9" id="parta17">
             <h2>Part 1.7: Image-to-Image Translation</h2>
             <p>
                 Using the SDEdit algorithm, I edit existing images by controlling how much noise is added before denoising.
@@ -302,7 +320,7 @@
             </div>
         </section>
 
-        <section class="partA10" id="part171">
+        <section class="partA10" id="parta171">
             <h2>Part 1.7.1: Editing Hand-Drawn and Web Images</h2>
             <p>
                 The SDEdit technique works exceptionally well on non-realistic inputs. 
@@ -344,7 +362,7 @@
             </div>
         </section>
 
-        <section class="partA11" id="part172">
+        <section class="partA11" id="parta172">
             <h2>Part 1.7.2: Inpainting</h2>
             <p>
                 I used the same procedure to implement inpainting, following the RePaint paper.
@@ -380,7 +398,7 @@
             </div>
         </section>
 
-        <section class="partA12" id="part173">
+        <section class="partA12" id="parta173">
             <h2>Part 1.7.3: Text-Conditional Image-to-Image Translation</h2>
             <p>
                 Building on SDEdit, I now guide the image projection with specific text prompts instead of the generic "a high quality photo". 
@@ -419,7 +437,7 @@
             </div>
         </section>
 
-        <section class="partA13" id="part18">
+        <section class="partA13" id="parta18">
             <h2>Part 1.8: Visual Anagrams</h2>
             <p>
                 Visual anagrams are optical illusions where an image appears as one thing normally but reveals a different picture when flipped upside down. 
@@ -457,7 +475,7 @@
             </div>
         </section>
 
-        <section class="partA14" id="part19">
+        <section class="partA14" id="parta19">
             <h2>Part 1.9: Hybrid Images</h2>
             <p>
                 We can also use this diffusion model to create hybrid images that show different content at different viewing distances. 
@@ -489,8 +507,99 @@
         </section>
 
         <section class="subsection" id="partb">
-            <h1>Part B: Flow Matching From Scratch</h1>
+            <h1>Part B: Flow Matching From Scratch!</h1>
             <p>Working on this rn, come back in a week.</p>
+        </section>
+
+        <section class="partB" id="partb1">
+            <h2>Part 1: Training a Single-Step Denoising UNet</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb11">
+            <h2>Part 1.1: Implementing the UNet</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb12">
+            <h2>Part 1.2: Using the UNet to Train a Denoiser</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb121">
+            <h2>Part 1.2.1: Training</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb121">
+            <h2>Part 1.2.2: Out-of-Distribution Testing</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb123">
+            <h2>Part 1.2.3: Denoising Pure Noise</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb2">
+            <h2>Part 2: Training a Flow Matching Model</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb21">
+            <h2>Part 2.1: Adding Time Conditioning to UNet</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb22">
+            <h2>Part 2.2: Training the UNet</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb23">
+            <h2>Part 2.3: Sampling from the UNet</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb24">
+            <h2>Part 2.4: Adding Class-Conditioning to UNet</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb25">
+            <h2>Part 2.5: Training the UNet</h2>
+            <p>
+                something
+            </p>
+        </section>
+
+        <section class="partB" id="partb26">
+            <h2>Part 2.6: Sampling from the UNet</h2>
+            <p>
+                something
+            </p>
         </section>
 
     </div>
