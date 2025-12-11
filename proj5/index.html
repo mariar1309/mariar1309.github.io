@@ -523,6 +523,16 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/unconditional_unet.jpeg" alt="unet" >
+                    <figcaption> Unconditional UNet </figcaption>
+                </figure>
+                <figure>
+                    <img src="images_5b/unet_operations.jpeg" alt="unet">
+                    <figcaption>Standard UNet Operations</figcaption>
+                </figure>
+            </div>
         </section>
 
         <section class="partB" id="partb12">
@@ -530,6 +540,11 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/1_2_noisy.jpeg" alt="unet" >
+                </figure>
+            </div>
         </section>
 
         <section class="partB" id="partb121">
@@ -537,13 +552,30 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/121_chart.jpeg" alt="unet" >
+                    <figcaption> Result after training for 1 and for 5 epochs </figcaption>  
+                </figure>
+                <figure>
+                    <img src="images_5b/121_curve.jpeg" alt="unet">
+                    <figcaption>Training loss curve for training process of σ=0.5</figcaption>
+                </figure>
+            </div>
         </section>
 
-        <section class="partB" id="partb121">
+        <section class="partB" id="partb122">
             <h2>Part 1.2.2: Out-of-Distribution Testing</h2>
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/122_testing.jpeg" alt="unet" >
+                    <figcaption> (Top: Input, Middle: Noisy with specified σ applied, Bottom: Output)  </figcaption>
+                </figure>
+
+            </div>
         </section>
 
         <section class="partB" id="partb123">
@@ -551,6 +583,17 @@
             <p>
                 something
             </p>
+
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/123_chart.jpeg" alt="unet" >
+                    <figcaption> Results after denoising pure noise for 1 and 5 epochs </figcaption>  
+                </figure>
+                <figure>
+                    <img src="images_5b/123_curve.jpeg" alt="unet">
+                    <figcaption>Training loss curve for pure noise denoising</figcaption>
+                </figure>
+            </div>
         </section>
 
         <section class="partB" id="partb2">
@@ -565,6 +608,18 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/conditioned_unet.jpeg" alt="unet" >
+                    <figcaption> Conditioned UNet </figcaption>  
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/fcblock.jpeg" alt="unet">
+                    <figcaption>FCBlock for conditioning</figcaption>
+                </figure>
+            </div>
         </section>
 
         <section class="partB" id="partb22">
@@ -572,6 +627,12 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/22_curve.jpeg" alt="unet" >
+                    <figcaption> Training loss curve for time-conditioned UNet over 20 epochs </figcaption>  
+                </figure>
+            </div>
         </section>
 
         <section class="partB" id="partb23">
@@ -579,6 +640,12 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/23_sampling.jpeg" alt="unet" >
+                    <figcaption> Top Row: Epoch 1, Middle Row: Epoch 5, Bottom Row: Epoch 10 </figcaption>  
+                </figure>
+            </div>
         </section>
 
         <section class="partB" id="partb24">
@@ -593,6 +660,12 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/25_curve.jpeg" alt="unet" >
+                    <figcaption> Training loss curve plot for the class-conditioned UNet </figcaption>  
+                </figure>
+            </div>
         </section>
 
         <section class="partB" id="partb26">
@@ -600,8 +673,58 @@
             <p>
                 something
             </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/26_epoch_1.jpeg" alt="unet" >
+                    <figcaption> Epoch 1 </figcaption>  
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/26_epoch_5.jpeg" alt="unet" >
+                    <figcaption> Epoch 5 </figcaption> 
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/26_epoch_10.jpeg" alt="unet" >
+                    <figcaption> Epoch 10 </figcaption> 
+                </figure>
+            </div>
         </section>
 
+        <section class="partB" id="partb26">
+            <h2>Part 2.6: Sampling from the UNet - Without Learning Rate Scheduler</h2>
+            <p>
+                something
+            </p>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/26_comparison.jpeg" alt="unet" >
+                    <figcaption> Top: Scheduler , Bottom: No Scheduler </figcaption>  
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/nosched_curve.jpeg" alt="unet" >
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/nosched_epoch_1.jpeg" alt="unet" >
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/nosched_epoch_5.jpeg" alt="unet" >
+                </figure>
+            </div>
+            <div class="gallery">
+                <figure>
+                    <img src="images_5b/nosched_epoch_10.jpeg" alt="unet" >
+                </figure>
+            </div>
+        </section>
     </div>
     <script>
         window.addEventListener('scroll', function() {
