@@ -508,20 +508,36 @@
 
         <section class="subsection" id="partb">
             <h1>Part B: Flow Matching From Scratch!</h1>
-            <p>Working on this rn, come back in a week.</p>
+            <p>In Part B I implemented a flow matching model from scratch to generate MNIST digits. 
+                I did so by building and training a UNet architecture to learn the mapping from pure noise to clean images. 
+                It uses flow matching to learn a continuous flow vector field  that transforms random Gaussian noise into 
+                data samples through iterative denoising.
+
+            </p>
         </section>
 
         <section class="partB" id="partb1">
             <h2>Part 1: Training a Single-Step Denoising UNet</h2>
             <p>
-                something
+                I started by buildng a single step UNet denoiser, where the trained model takes a noisy MNIST image and directly predicts 
+                the clean version in one single forward pass.
+                The training objective here is to minimize the L2 loss between the model's prediction and the actual clean image.
             </p>
         </section>
 
         <section class="partB" id="partb11">
             <h2>Part 1.1: Implementing the UNet</h2>
             <p>
-                something
+                My implemented UNet architecture follows the diagram shown below, with multiple upsampling and downsampling blocks and skip connections.
+                The UNet (called this because of its "U" shape) consists of an encoder part that progressively downsamples the input, 
+                a bottleneck that compresses the downsampled features to a 1x1 spacial dimension, 
+                and a final decoder part that upsamples it back to the original resolution.
+                The architecture also includes important skip connections that concatenate features from the encoder to the decoder at the 
+                matching resolutions, allowing the network to preserve fine spacial details that got lost during the downsampling.
+                The downsampling and upsampling operations also include batch normalization and GELU activation for stable training.
+            </p>
+            <p>
+                See the full UNet architecture and its individual building blocks in the diagram below:
             </p>
             <div class="gallery">
                 <figure>
@@ -538,7 +554,12 @@
         <section class="partB" id="partb12">
             <h2>Part 1.2: Using the UNet to Train a Denoiser</h2>
             <p>
-                something
+                After imlpementing the UNet, I need to train it. To create noisy training data, I applied Gaussian noise at different levels 
+                (σ = [0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]) to clean MNIST images using the formula z = x + σε where x is a clean MNIST digit, 
+                σ is the noise level, ε ~ N(0, I), and z is the resulting noisy image. Visualization below shows how the increasing noise level 
+                corrupts the original image more and more. We're going to neet a lot of these training pairs (noisy, clean) to train out UNet with later
+                on how to remove noise.
+
             </p>
             <div class="gallery">
                 <figure>
@@ -550,7 +571,16 @@
         <section class="partB" id="partb121">
             <h2>Part 1.2.1: Training</h2>
             <p>
-                something
+                I trained the UNet denoiser on MNIST with a fixed noise level of σ=0.5. 
+                For each training batch, I added new random Gaussian noise to a clean image. 
+                The model was trained with batch size 256, learning rate 1e-4, and hidden dimension D=128 for 5 epochs using the 
+                Adam optimizer. 
+            </p>
+            <p>
+                The training loss curve below shows steady convergence, with the MSE loss decreasing smoothly as the model 
+                learns to predict clean images from noisy inputs.
+                The chart below also shows denoising results after 1 and after 5 epochs, with epoch 5 outputs being much cleaner
+                then epoch 1 outputs.
             </p>
             <div class="gallery">
                 <figure>
@@ -567,7 +597,12 @@
         <section class="partB" id="partb122">
             <h2>Part 1.2.2: Out-of-Distribution Testing</h2>
             <p>
-                something
+                Although our denoiser was trained exclusively on σ=0.5 noise, I also tested it on different σ 's that it wasn't designed for.
+                The denoiser performs best at σ=0.5 (its training level), producing clean and accurate reconstructions, as well as on all 
+                lower σ 's where the smaller amount of noise still makes the digit easily recognizeable.
+
+                But for σ > 5, the model begins to struggle due to higher amount of noise and thus produces poorer results, with the predicted
+                digits looking more crooked.
             </p>
             <div class="gallery">
                 <figure>
@@ -581,7 +616,18 @@
         <section class="partB" id="partb123">
             <h2>Part 1.2.3: Denoising Pure Noise</h2>
             <p>
-                something
+                To make denoising a generative task, we need to denoise pure, random Gaussian noise (σ=1.0).
+                With MSE loss, the optimal solution is to predict 
+                the mean (centroid) of all training examples, because this minimizes the expected squared distance to any possible target.
+                The results seen below look very blurry and generic (is that an 8? a 9? a 3?). The generated output shows a pattern of
+                very blurry, averaged digit-like blobs rather than crisp individual digits.
+                All outputs look similar regardless of the input noise because the model learns to output an "average MNIST digit" rather than a 
+                specific number.
+                This happens because the model has no way to determine which specific digit to 
+                generate from pure noise, so it tries to guess and output something that minimally distances itself from all 
+                possibilities. Without iterative refinement or additional 
+                conditioning information, the model cannot produce accurate high-quality samples.
+
             </p>
 
             <div class="gallery">
