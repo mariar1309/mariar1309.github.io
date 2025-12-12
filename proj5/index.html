@@ -645,14 +645,28 @@
         <section class="partB" id="partb2">
             <h2>Part 2: Training a Flow Matching Model</h2>
             <p>
-                something
+                Turns out denoising everything in one step is not that effective. Oops!
+                So we improve our UNet by imlementing <b>Flow Matching!</b> 
+                Flow Matching learns a continuous flow field that describes how to move from pure noise (at t=0) to clean data (at t=1).
+                The model learns to predict the velocity v_t = x_1 - x_0 at any interpolated point x_t = (1-t)x_0 + t*x_1. 
+                By following this learned flow with small steps, we can generate high-quality samples through iterative denoising. 
             </p>
         </section>
 
         <section class="partB" id="partb21">
             <h2>Part 2.1: Adding Time Conditioning to UNet</h2>
             <p>
-                something
+                I injected scalar <i>t</i> into the UNet model following the architecture below. 
+                For flow matching to work, the UNet must know where it is along the denoising trajectory (t ∈ [0,1]). 
+                I extended the unconditional UNet by adding time conditioning through FCBlocks (Fully Connected Blocks). 
+                The scalar timestep t is processed through two separate FCBlocks to create embeddings that inject the conditioning 
+                signal into the UNet's internal features at two key locations (after the bottleneck and after the first upsampling block).
+            </p>
+            <p>
+                This addition allows the network to adapt its behavior based on the noise level. 
+                At early timesteps (t≈0), 
+                the input is about pure noise and the model focuses on coarse structure, and at later timesteps (t≈1), 
+                the input is almost clean and the model refines fine details.
             </p>
             <div class="gallery">
                 <figure>
@@ -671,7 +685,16 @@
         <section class="partB" id="partb22">
             <h2>Part 2.2: Training the UNet</h2>
             <p>
-                something
+                I then needed to train the new UNet to predict the flow v_t = x_1 - x_0 at randomly sampled timesteps.
+                During training, for each clean image x_1, I sampled pure Gaussian noise x_0 and a random timestep t. 
+                I then computed the interpolation x_t = (1-t)x_0 + t*x_1, and trained the UNet to predict the true flow. 
+                I used a smaller network (D=64) and larger learning rate (1e-2) compared 
+                to Part 1, with an exponential learning rate scheduler (γ=0.9996^(1/0.1)) that gradually decays the learning rate over 
+                20 epochs.
+            </p>
+            <p>
+                The training loss curve plot below shows smooth convergence as the model learns the flow field and learns a continous mapping
+                across all noise levels.
             </p>
             <div class="gallery">
                 <figure>
@@ -684,7 +707,17 @@
         <section class="partB" id="partb23">
             <h2>Part 2.3: Sampling from the UNet</h2>
             <p>
-                something
+                Now that we have a new and improved trained UNet, below are some iterative sampling results for generating MNIST digits
+                from pure noise. 
+                Starting with z_0 ~ N(0, I), I follow the learned flow field by repeatedly predicting the velocity v_t and taking small 
+                Euler steps: z_{t+Δt} = z_t + v_t · Δt. Over 50 timesteps, this gradually transforms random noise into recognizable digits.
+            </p>
+            <p>
+                Some results are still quite messy, but you can see noticeable improvement across epochs. After epoch 1, the digits are very wobbly 
+                and blurry, looking more like scribbles rather than numbers. But by Epoch 5, we can notice them taking more distinctive and clear shapes, 
+                with most looking very distinct by Epoch 10.
+                But one big issue right now is that we cannot control which digit is generated, as the model currently produces random digits 0-9 based on the 
+                random initial noise. Enter: Class Conditioning!
             </p>
             <div class="gallery">
                 <figure>
@@ -697,14 +730,26 @@
         <section class="partB" id="partb24">
             <h2>Part 2.4: Adding Class-Conditioning to UNet</h2>
             <p>
-                something
+                Class-conditioning in UNet means injecting specific class label (like "apple", "cat", or "MNIST digit 3") into the flow
+                so that the UNet learns to generate images that are specifically conditioned on that category.
+                In class-conditioning, the model accepts both a timestep t and a class label c (one-hot encoded for digits 0-9).
+                I added two more FCBlocks to process the class embedding, bringing the total to four conditioning blocks (two for time (fc1_t, fc2_t) and two for class (fc1_c, fc2_c)).
+                This design combines class and time information (unflatten = c₁ * unflatten + t₁ and up1 = c₂ * up1 + t₂). 
+                This allows the network to use class information to control content (which digit to generate) while using time information 
+                to control the noise level. 
+                I implemented classifier-free guidance (CFG) training by randomly dropping the class conditioning 10% of the time, 
+                which at sampling time allows us to compute both conditional and unconditional flows and extrapolate (v_guided = v_uncond + γ(v_cond - v_uncond))
+                , amplifying the class signal for higher quality generation.
             </p>
         </section>
 
         <section class="partB" id="partb25">
             <h2>Part 2.5: Training the UNet</h2>
             <p>
-                something
+                Training the class-conditioned UNet is very similar to the flow matching from before, but now with class labels included. 
+                During training, for each clean image x_1 and its label, I convert the label to a one-hot vector, apply 10% class dropout for  CFG, 
+                sample noise and timestep, and train the UNet to predict the flow. The curve below shows training loss decreasing smoothly, meaning the model
+                gradually learns to incorporate class info into the flow prediction.
             </p>
             <div class="gallery">
                 <figure>
@@ -717,7 +762,12 @@
         <section class="partB" id="partb26">
             <h2>Part 2.6: Sampling from the UNet</h2>
             <p>
-                something
+                Now we will sample with class-conditioning and will use classifier-free guidance with γ=5.0.
+                For each digit 0-9, I generate 4 instances by creating a batch of labels, running the iterative sampling process with CFG scale γ=5.0
+                The results below show much better improvement across epochs! 
+                After Epoch 1 the digits are already visible thanks to conditioning, by Epoch 5 they get cleaner, and by Epoch 10 they are very clearly defined and 
+                recognized 0-9 digits that we were expecting.
+
             </p>
             <div class="gallery">
                 <figure>
@@ -742,7 +792,17 @@
         <section class="partB" id="partb26">
             <h2>Part 2.6: Sampling from the UNet - Without Learning Rate Scheduler</h2>
             <p>
-                something
+                To simplify the training process, I tried removing the annoying exponential learning rate scheduler. 
+                I retrained the class-conditioned model from scratch using a constant learning rate of 5e-3 (half the original 1e-2) 
+                without any scheduler. This lower constant learning rate prevents overshooting and maintains stability throughout training.
+            </p>
+            <p>
+                As seen below, the results from No Scheduler experiment look nearly identical to when I was using the Scheduler.
+                The training loss curve and final sampled digits are very similar.
+                The class conditioning signal is strong enough that the model converges well  even with a fixed learning rate. 
+                This shows that when the conditioning signal is very informative (as with class labels),
+                the model learns well without needing more complicated learning rate schedules.
+
             </p>
             <div class="gallery">
                 <figure>
