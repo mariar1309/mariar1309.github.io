@@ -55,7 +55,7 @@
   header.innerHTML = `
     <div class="header-inner">
       <a class="logo" href="${root}index.html">🚀 Maria Rufova</a>
-      <span class="header-email">mariarufova@berkeley.edu</span>
+      <span class="header-email">mariarufova[at]berkeley.edu</span>
       <nav class="main-nav"><ul>${linksHTML}</ul></nav>
       <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
     </div>`;
