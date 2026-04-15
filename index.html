@@ -3,30 +3,51 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CS 180 (Computer Vision and Computational Photography) Portfolio</title>
-    <h3>UC Berkeley - Maria Rufova</h3>
+    <title>Maria Rufova</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="sidebar-content">
-            <h3>Navigation</h3>
-            <ul>
-                <li><a href="#home" class="active">Home</a></li>
+
+    <nav class="topnav">
+        <div class="nav-inner">
+            <a href="#about" class="nav-logo">🚀 Maria Rufova</a>
+            <span class="nav-tagline"><em>B.S. EECS, UC Berkeley</em></span>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
                 <li><a href="#projects">Projects</a></li>
+                <li><a href="#resume">Resume</a></li>
+                <li><a href="#publications">Publications</a></li>
+                <li><a href="#book-reviews">Book Reviews</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </div>
-    </aside>
+    </nav>
 
-    <div class="main-wrapper">
-        <header class="header" id="home">
-            <h1>My CS180 Portfolio</h1>
-            <h2>UC Berkeley Fall 2025 — Maria Rufova</h2>
-        </header>
+    <main class="content">
 
+        <!-- ABOUT -->
+        <section id="about">
+            <h1 class="section-title">About</h1>
+            <hr class="section-divider">
+            <div class="about-grid">
+                <img src="./images/profile.jpg" alt="Maria Rufova" class="profile-photo">
+                <div class="about-text">
+                    <p>Maria Rufova is a senior studying Computer Science and Electrical Engineering at UC Berkeley, graduating May 2026. Her interests span machine learning, systems, and human-AI interaction.</p>
+                    <p>She has interned twice at Microsoft — most recently on the Copilot Platform, where she built a compliance-focused Declarative Agent for enterprise use. She is also a research assistant at the Gopnik Cognitive Development and Learning Lab, studying how children and AI agents approach open-ended exploration, with work published at NeurIPS 2023. As a member of GamesCrafters, she works on strongly solving abstract strategy games in C.</p>
+                    <p>Outside of work, she is involved in CS Scholars, the Society of Women Engineers, and the Association of Women in EE&CS.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS -->
         <section id="projects">
-            <h2>Course Projects</h2>
+            <h1 class="section-title">Projects</h1>
+            <hr class="section-divider">
+
+            <h2 class="subsection-title">Computer Vision</h2>
             <div class="project-grid">
                 <a class="card" href="./proj0/">
                     <h3>Project 0</h3>
@@ -50,15 +71,108 @@
                 </a>
                 <a class="card" href="./proj5/">
                     <h3>Project 5</h3>
-                    <p>Fun With Diffusion Models</p>
+                    <p>Fun with Diffusion Models</p>
                 </a>
             </div>
         </section>
 
-        <section id="contact">
-            <h2>Contact</h2>
-            <p>You can reach me at <a href="mailto:mariarufova@berkeley.edu">mariarufova@berkeley.edu</a>.</p>
+        <!-- RESUME -->
+        <section id="resume">
+            <h1 class="section-title">Resume</h1>
+            <hr class="section-divider">
+
+            <h2 class="subsection-title">Education</h2>
+            <div class="resume-entries">
+                <div class="resume-entry">
+                    <div class="resume-row">
+                        <span class="resume-org">University of California, Berkeley</span>
+                        <span class="resume-date">Grad. May 2026</span>
+                    </div>
+                    <div class="resume-row">
+                        <span class="resume-role">B.S. Computer Science and Electrical Engineering</span>
+                        <span class="resume-location">Berkeley, CA</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="subsection-title">Experience</h2>
+            <div class="resume-entries">
+                <div class="resume-entry">
+                    <div class="resume-row">
+                        <span class="resume-org">Microsoft Corporation</span>
+                        <span class="resume-date">May – Aug 2025</span>
+                    </div>
+                    <div class="resume-row">
+                        <span class="resume-role">Software Engineering Intern</span>
+                        <span class="resume-location">Redmond, WA</span>
+                    </div>
+                </div>
+                <div class="resume-entry">
+                    <div class="resume-row">
+                        <span class="resume-org">Gopnik Cognitive Development and Learning Lab</span>
+                        <span class="resume-date">Jan 2023 – Present</span>
+                    </div>
+                    <div class="resume-row">
+                        <span class="resume-role">Research Assistant</span>
+                        <span class="resume-location">Berkeley, CA</span>
+                    </div>
+                </div>
+                <div class="resume-entry">
+                    <div class="resume-row">
+                        <span class="resume-org">GamesCrafters Computational Game Theory Research Group</span>
+                        <span class="resume-date">Jan 2024 – Dec 2025</span>
+                    </div>
+                    <div class="resume-row">
+                        <span class="resume-role">Game Solver / C Programmer</span>
+                        <span class="resume-location">Berkeley, CA</span>
+                    </div>
+                </div>
+                <div class="resume-entry">
+                    <div class="resume-row">
+                        <span class="resume-org">Microsoft Corporation</span>
+                        <span class="resume-date">May – Aug 2024</span>
+                    </div>
+                    <div class="resume-row">
+                        <span class="resume-role">Software Engineering Intern</span>
+                        <span class="resume-location">Redmond, WA</span>
+                    </div>
+                </div>
+                <div class="resume-entry">
+                    <div class="resume-row">
+                        <span class="resume-org">Jane Street Capital</span>
+                        <span class="resume-date">Jan 2024</span>
+                    </div>
+                    <div class="resume-row">
+                        <span class="resume-role">"In Focus" Program — Software Engineering Track</span>
+                        <span class="resume-location">New York, NY</span>
+                    </div>
+                </div>
+            </div>
         </section>
-    </div>
+
+        <!-- PUBLICATIONS -->
+        <section id="publications">
+            <h1 class="section-title">Publications</h1>
+            <hr class="section-divider">
+            <p class="empty-note">Coming soon.</p>
+        </section>
+
+        <!-- BOOK REVIEWS -->
+        <section id="book-reviews">
+            <h1 class="section-title">Book Reviews</h1>
+            <hr class="section-divider">
+            <p class="empty-note">Coming soon.</p>
+        </section>
+
+        <!-- CONTACT -->
+        <section id="contact">
+            <h1 class="section-title">Contact</h1>
+            <hr class="section-divider">
+            <p><a href="mailto:mariarufova@berkeley.edu">mariarufova@berkeley.edu</a></p>
+            <p><a href="https://www.linkedin.com/in/mariarufova" target="_blank">LinkedIn</a></p>
+        </section>
+
+    </main>
+
 </body>
 </html>
